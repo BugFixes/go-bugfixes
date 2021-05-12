@@ -7,9 +7,9 @@ import (
 	"net/http"
 	"os"
 	"runtime/debug"
-  "strconv"
-  "strings"
-  "time"
+	"strconv"
+	"strings"
+	"time"
 )
 
 type BugFixes struct {
@@ -87,12 +87,12 @@ func sendToBugfixes(rvr interface{}) {
 }
 
 func parseBugLine(bugLine string) (string, int, error) {
-  i := strings.Index(bugLine, ":")
-  file := bugLine[:i]
-  line, err := strconv.Atoi(bugLine[i+1:])
-  if err != nil {
-    return "", 0, fmt.Errorf("failed to convert line number: %w", err)
-  }
+	i := strings.Index(bugLine, ":")
+	file := bugLine[:i]
+	line, err := strconv.Atoi(bugLine[i+1:])
+	if err != nil {
+		return "", 0, fmt.Errorf("failed to convert line number: %w", err)
+	}
 
 	return file, line, nil
 }
