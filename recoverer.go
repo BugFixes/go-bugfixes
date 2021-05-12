@@ -130,7 +130,10 @@ func (s prettyStack) bugParse(debugStack []byte, rvr interface{}) (BugFixes, err
 		lines[i], lines[opp] = lines[opp], lines[i]
 	}
 
-	bug.BugLine = lines[1]
+	bugLine := lines[1]
+	i := strings.Index(bugLine, " ")
+	bug.BugLine = bugLine[:i]
+
 	file, line, err := parseBugLine(lines[1])
 	if err != nil {
 		return bug, fmt.Errorf("failed to parse bug line: %w", err)
