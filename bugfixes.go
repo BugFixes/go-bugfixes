@@ -88,8 +88,9 @@ func sendToBugfixes(rvr interface{}) {
 
 func parseBugLine(bugLine string) (string, int, error) {
 	i := strings.Index(bugLine, ":")
+	j := strings.Index(bugLine, " ")
 	file := bugLine[:i]
-	line, err := strconv.Atoi(bugLine[i+1:])
+	line, err := strconv.Atoi(bugLine[i+1:j])
 	if err != nil {
 		return "", 0, fmt.Errorf("failed to convert line number: %w", err)
 	}
