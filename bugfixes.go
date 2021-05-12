@@ -84,23 +84,23 @@ func sendToBugfixes(rvr interface{}) {
 	}
 
 	resp, err := client.Do(request)
-  if err != nil {
-    fmt.Fprintf(out, "bugfixes: failed to send bug: %v", err)
-    os.Stderr.Write(out.Bytes())
-    return
-  }
+	if err != nil {
+		fmt.Fprintf(out, "bugfixes: failed to send bug: %v", err)
+		os.Stderr.Write(out.Bytes())
+		return
+	}
 	if err := resp.Body.Close(); err != nil {
-    fmt.Fprintf(out, "bugfixes: failed to close body: %v", err)
-    os.Stderr.Write(out.Bytes())
-    return
-  }
+		fmt.Fprintf(out, "bugfixes: failed to close body: %v", err)
+		os.Stderr.Write(out.Bytes())
+		return
+	}
 }
 
 func parseBugLine(bugLine string) (string, int, error) {
 	i := strings.Index(bugLine, ":")
 	j := strings.Index(bugLine, " ")
 	file := bugLine[:i]
-	line, err := strconv.Atoi(bugLine[i+1:j])
+	line, err := strconv.Atoi(bugLine[i+1 : j])
 	if err != nil {
 		return "", 0, fmt.Errorf("failed to convert line number: %w", err)
 	}
