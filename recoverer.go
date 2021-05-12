@@ -139,7 +139,7 @@ func (s prettyStack) bugParse(debugStack []byte, rvr interface{}) (BugFixes, err
 		return bug, fmt.Errorf("failed to parse bug line: %w", err)
 	}
 
-	bug.Raw = flatten(lines)
+	bug.Raw = flatten(lines, "\n")
 
 	// decorate
 	for i, line := range lines {
@@ -151,13 +151,13 @@ func (s prettyStack) bugParse(debugStack []byte, rvr interface{}) (BugFixes, err
 
 	bug.File = file
 	bug.Line = line
-	bug.Bug = flatten(lines)
+	bug.Bug = flatten(lines, "")
 
 	return bug, nil
 }
 
-func flatten(lines []string) string {
-	return strings.Join(lines[:], "\n")
+func flatten(lines []string, seperator string) string {
+	return strings.Join(lines[:], seperator)
 }
 
 func (s prettyStack) decorateLine(line string, useColor bool, num int) (string, error) {
