@@ -113,10 +113,12 @@ func (s prettyStack) bugParse(debugStack []byte, rvr interface{}) (BugFixes, err
 	stack := strings.Split(string(debugStack), "\n")
 	lines := []string{}
 
+	bug.Level = "unknown"
 	// locate panic line, as we may have nested panics
 	for i := len(stack) - 1; i > 0; i-- {
 		lines = append(lines, stack[i])
 		if strings.HasPrefix(stack[i], "panic(0x") {
+			bug.Level = "error"
 			lines = lines[0 : len(lines)-2] // remove boilerplate
 			break
 		}
@@ -128,12 +130,13 @@ func (s prettyStack) bugParse(debugStack []byte, rvr interface{}) (BugFixes, err
 		lines[i], lines[opp] = lines[opp], lines[i]
 	}
 
+	bug.BugLine = lines[1]
 	file, line, err := parseBugLine(lines[1])
 	if err != nil {
 		return bug, fmt.Errorf("failed to parse bug line: %w", err)
 	}
 
-	bug.Raw = lines
+	bug.Raw = flatten(lines)
 
 	// decorate
 	for i, line := range lines {
@@ -145,9 +148,13 @@ func (s prettyStack) bugParse(debugStack []byte, rvr interface{}) (BugFixes, err
 
 	bug.File = file
 	bug.Line = line
-	bug.Bug = lines
+	bug.Bug = flatten(lines)
 
 	return bug, nil
+}
+
+func flatten(lines []string) string {
+	return strings.Join(lines[:], "\n")
 }
 
 func (s prettyStack) decorateLine(line string, useColor bool, num int) (string, error) {

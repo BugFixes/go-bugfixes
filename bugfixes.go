@@ -18,6 +18,7 @@ type BugFixes struct {
 	BugLine string      `json:"bug_line"`
 	File    string      `json:"file"`
 	Line    int         `json:"line"`
+	Level   string      `json:"level"`
 }
 
 // New will create a new middleware handler from a http.Handler.
@@ -82,15 +83,24 @@ func sendToBugfixes(rvr interface{}) {
 		return
 	}
 
-	resp, _ := client.Do(request)
-	_ = resp.Body.Close()
+	resp, err := client.Do(request)
+	if err != nil {
+		fmt.Fprintf(out, "bugfixes: failed to send bug: %v", err)
+		os.Stderr.Write(out.Bytes())
+		return
+	}
+	if err := resp.Body.Close(); err != nil {
+		fmt.Fprintf(out, "bugfixes: failed to close body: %v", err)
+		os.Stderr.Write(out.Bytes())
+		return
+	}
 }
 
 func parseBugLine(bugLine string) (string, int, error) {
 	i := strings.Index(bugLine, ":")
 	j := strings.Index(bugLine, " ")
 	file := bugLine[:i]
-	line, err := strconv.Atoi(bugLine[i+1:j])
+	line, err := strconv.Atoi(bugLine[i+1 : j])
 	if err != nil {
 		return "", 0, fmt.Errorf("failed to convert line number: %w", err)
 	}
