@@ -113,10 +113,12 @@ func (s prettyStack) bugParse(debugStack []byte, rvr interface{}) (BugFixes, err
 	stack := strings.Split(string(debugStack), "\n")
 	lines := []string{}
 
+	bug.Level = "unknown"
 	// locate panic line, as we may have nested panics
 	for i := len(stack) - 1; i > 0; i-- {
 		lines = append(lines, stack[i])
 		if strings.HasPrefix(stack[i], "panic(0x") {
+		  bug.Level = "error"
 			lines = lines[0 : len(lines)-2] // remove boilerplate
 			break
 		}
