@@ -56,6 +56,7 @@ func sendToBugfixes(rvr interface{}) {
   if err != nil {
     fmt.Fprintf(out, "bugfixes: failed to parse bug: %v", err)
     os.Stderr.Write(out.Bytes())
+    return
   }
 
   bugServer := "https://api.bugfix.es/bug"
@@ -67,6 +68,7 @@ func sendToBugfixes(rvr interface{}) {
   if err != nil {
     fmt.Fprintf(out, "bugfixes: failed to marshall bug: %v", err)
     os.Stderr.Write(out.Bytes())
+    return
   }
   request, err := http.NewRequest("POST", bugServer, bytes.NewBuffer(body))
   request.Header.Set("Content-type", "application/json")
@@ -75,11 +77,13 @@ func sendToBugfixes(rvr interface{}) {
   if err != nil {
     fmt.Fprintf(out, "bugfixes: failed to new request: %v", err)
     os.Stderr.Write(out.Bytes())
+    return
   }
 
   if _, err := client.Do(request); err != nil {
     fmt.Fprintf(out, "bugfixes: failed to send bug: %v", err)
     os.Stderr.Write(out.Bytes())
+    return
   }
 }
 
