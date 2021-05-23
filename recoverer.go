@@ -29,7 +29,7 @@ func Recoverer(next http.Handler) http.Handler {
 
 				w.WriteHeader(http.StatusInternalServerError)
 
-				sendToBugfixes(rvr)
+				go sendToBugfixes(rvr)
 			}
 		}()
 
