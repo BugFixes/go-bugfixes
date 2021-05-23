@@ -13,12 +13,13 @@ import (
 )
 
 type BugFixes struct {
-	Bug     interface{} `json:"bug"`
-	Raw     interface{} `json:"raw"`
-	BugLine string      `json:"bug_line"`
-	File    string      `json:"file"`
-	Line    int         `json:"line"`
-	Level   string      `json:"level"`
+	Bug        interface{} `json:"bug"`
+	Raw        interface{} `json:"raw"`
+	BugLine    string      `json:"bug_line"`
+	File       string      `json:"file"`
+	Line       string      `json:"line"`
+	LineNumber int         `json:"line_number"`
+	Level      string      `json:"level"`
 }
 
 // New will create a new middleware handler from a http.Handler.

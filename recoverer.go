@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"os"
 	"runtime/debug"
+	"strconv"
 	"strings"
 )
 
@@ -29,7 +30,7 @@ func Recoverer(next http.Handler) http.Handler {
 
 				w.WriteHeader(http.StatusInternalServerError)
 
-				sendToBugfixes(rvr)
+				go sendToBugfixes(rvr)
 			}
 		}()
 
@@ -150,7 +151,8 @@ func (s prettyStack) bugParse(debugStack []byte, rvr interface{}) (BugFixes, err
 	}
 
 	bug.File = file
-	bug.Line = line
+	bug.LineNumber = line
+	bug.Line = strconv.Itoa(line)
 	bug.Bug = flatten(lines, "")
 
 	return bug, nil
