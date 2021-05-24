@@ -1,11 +1,11 @@
 package middleware
 
 import (
-  "net/http"
+	"net/http"
 )
 
 func BugFixes(next http.Handler) http.Handler {
-  handler := RequestID(next)
+	handler := RequestID(next)
 	handler = Logger(handler)
 	return Recoverer(handler)
 }
