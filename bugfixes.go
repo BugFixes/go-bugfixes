@@ -97,14 +97,15 @@ func sendToBugfixes(rvr interface{}) {
 	}
 }
 
-func parseBugLine(bugLine string) (string, int, error) {
+func parseBugLine(bugLine string) (string, string, int, error) {
 	i := strings.Index(bugLine, ":")
 	j := strings.Index(bugLine, " ")
 	file := bugLine[:i]
-	line, err := strconv.Atoi(bugLine[i+1 : j])
+	lne := bugLine[i+1 : j]
+	line, err := strconv.Atoi(lne)
 	if err != nil {
-		return "", 0, fmt.Errorf("failed to convert line number: %w", err)
+		return file, lne, 0, fmt.Errorf("failed to convert line number: %w", err)
 	}
 
-	return file, line, nil
+	return file, lne, line, nil
 }
