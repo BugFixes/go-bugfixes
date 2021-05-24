@@ -23,7 +23,7 @@ var (
 // Logger is a middleware that logs the start and end of each request, along
 // with some useful data about what was requested, what the response status was,
 // and how long it took to return. When standard output is a TTY, Logger will
-// print in color, otherwise it will print in black and white. Logger prints a
+// print in color, otherwise it will print in black and white. Logger prints
 // request ID if one is provided.
 //
 // Alternatively, look at https://github.com/goware/httplog for a more in-depth
