@@ -1,14 +1,13 @@
 package bugfixes
 
 import (
-	"bytes"
-	"errors"
-	"fmt"
-	"net/http"
-	"os"
-	"runtime/debug"
-	"strconv"
-	"strings"
+  "bytes"
+  "errors"
+  "fmt"
+  "net/http"
+  "os"
+  "runtime/debug"
+  "strings"
 )
 
 // Recoverer is a middleware that recovers from panics, logs the panic (and a
@@ -118,7 +117,7 @@ func (s prettyStack) bugParse(debugStack []byte, rvr interface{}) (BugFixes, err
 	// locate panic line, as we may have nested panics
 	for i := len(stack) - 1; i > 0; i-- {
 		lines = append(lines, stack[i])
-		if strings.HasPrefix(stack[i], "panic(0x") {
+		if strings.HasPrefix(stack[i], "panic") {
 			bug.Level = "panic"
 			lines = lines[0 : len(lines)-2] // remove boilerplate
 			break
@@ -135,7 +134,7 @@ func (s prettyStack) bugParse(debugStack []byte, rvr interface{}) (BugFixes, err
 	i := strings.Index(bugLine, " ")
 	bug.BugLine = bugLine[:i]
 
-	file, line, err := parseBugLine(lines[1])
+	file, line, lineNumber, err := parseBugLine(lines[1])
 	if err != nil {
 		return bug, fmt.Errorf("failed to parse bug line: %w", err)
 	}
@@ -151,8 +150,8 @@ func (s prettyStack) bugParse(debugStack []byte, rvr interface{}) (BugFixes, err
 	}
 
 	bug.File = file
-	bug.LineNumber = line
-	bug.Line = strconv.Itoa(line)
+	bug.LineNumber = lineNumber
+	bug.Line = line
 	bug.Bug = flatten(lines, "")
 
 	return bug, nil
