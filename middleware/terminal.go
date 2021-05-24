@@ -1,4 +1,4 @@
-package bugfixes
+package middleware
 
 import (
 	"fmt"

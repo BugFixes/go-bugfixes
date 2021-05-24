@@ -1,4 +1,4 @@
-package bugfixes
+package middleware
 
 import (
 	"bytes"
@@ -97,8 +97,8 @@ func (s prettyStack) parse(debugStack []byte, rvr interface{}) ([]byte, error) {
 	return buf.Bytes(), nil
 }
 
-func (s prettyStack) bugParse(debugStack []byte, rvr interface{}) (BugFixes, error) {
-	bug := BugFixes{}
+func (s prettyStack) bugParse(debugStack []byte, rvr interface{}) (BugFixesSend, error) {
+	bug := BugFixesSend{}
 
 	var err error
 	useColor := true

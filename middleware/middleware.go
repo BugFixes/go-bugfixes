@@ -1,12 +1,11 @@
 package middleware
 
 import (
-	"net/http"
-
-	"github.com/bugfixes/go-bugfixes"
+  "net/http"
 )
 
-func Middleware(next http.Handler) http.Handler {
-	handler := bugfixes.Logger(next)
-	return bugfixes.Recoverer(handler)
+func BugFixes(next http.Handler) http.Handler {
+  handler := RequestID(next)
+	handler = Logger(handler)
+	return Recoverer(handler)
 }

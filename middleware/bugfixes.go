@@ -1,4 +1,4 @@
-package bugfixes
+package middleware
 
 import (
 	"bytes"
@@ -12,7 +12,7 @@ import (
 	"time"
 )
 
-type BugFixes struct {
+type BugFixesSend struct {
 	Bug        interface{} `json:"bug"`
 	Raw        interface{} `json:"raw"`
 	BugLine    string      `json:"bug_line"`
