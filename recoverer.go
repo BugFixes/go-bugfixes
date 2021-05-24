@@ -1,13 +1,13 @@
 package bugfixes
 
 import (
-  "bytes"
-  "errors"
-  "fmt"
-  "net/http"
-  "os"
-  "runtime/debug"
-  "strings"
+	"bytes"
+	"errors"
+	"fmt"
+	"net/http"
+	"os"
+	"runtime/debug"
+	"strings"
 )
 
 // Recoverer is a middleware that recovers from panics, logs the panic (and a
