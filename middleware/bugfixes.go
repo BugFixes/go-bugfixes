@@ -1,4 +1,4 @@
-package bugfixes
+package middleware
 
 import (
 	"bytes"
@@ -12,7 +12,7 @@ import (
 	"time"
 )
 
-type BugFixes struct {
+type BugFixesSend struct {
 	Bug        interface{} `json:"bug"`
 	Raw        interface{} `json:"raw"`
 	BugLine    string      `json:"bug_line"`
@@ -75,7 +75,7 @@ func sendToBugfixes(rvr interface{}) {
 		return
 	}
 	request, err := http.NewRequest("POST", bugServer, bytes.NewBuffer(body))
-	request.Header.Set("Content-type", "application/json")
+	request.Header.Set("Content-Type", "application/json")
 	request.Header.Set("X-API-KEY", agentKey)
 	request.Header.Set("X-API-SECRET", agentSecret)
 	if err != nil {
