@@ -33,13 +33,9 @@ func (b BugFixesLog) DoReporting() {
 		return
 	}
 
-	fmt.Printf("Bug %+v", b)
-	if b.Stack != nil {
-		fmt.Printf("%s\n", b.Stack)
-	}
-	return
-
-	b.sendLog()
+	go func() {
+    b.sendLog()
+  }()
 }
 
 func (b BugFixesLog) sendLog() {
@@ -148,8 +144,4 @@ func cW(w io.Writer, useColor bool, color []byte, s string, args ...interface{})
 	if IsTTY && useColor {
 		_, _ = w.Write(reset)
 	}
-}
-
-func reportIt() {
-
 }
