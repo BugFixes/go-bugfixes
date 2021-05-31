@@ -7,6 +7,8 @@ import (
 	"io"
 	"net/http"
 	"os"
+	"runtime"
+	"strconv"
 	"time"
 )
 
@@ -20,12 +22,22 @@ type BugFixesLog struct {
 }
 
 func (b BugFixesLog) DoReporting() {
-	b.makePretty()
+	_, file, line, _ := runtime.Caller(2)
+	b.File = file
+	b.LineNumber = line
+	b.Line = strconv.Itoa(line)
 
 	keepLocal := os.Getenv("BUGFIXES_LOCAL_ONLY")
-	if keepLocal == "" || keepLocal == "false" {
+	if keepLocal == "" || keepLocal == "true" {
+		b.makePretty()
 		return
 	}
+
+	fmt.Printf("Bug %+v", b)
+	if b.Stack != nil {
+		fmt.Printf("%s\n", b.Stack)
+	}
+	return
 
 	b.sendLog()
 }
@@ -67,7 +79,27 @@ func (b BugFixesLog) sendLog() {
 func (b BugFixesLog) makePretty() {
 	if b.Stack != nil {
 		PrintPrettyStack(b.Stack)
+		return
 	}
+
+	out := &bytes.Buffer{}
+
+	switch b.Level {
+	case "warn":
+		cW(out, true, bBlue, b.Level)
+	case "info":
+		cW(out, true, bYellow, b.Level)
+
+	case "log":
+		cW(out, true, bGreen, b.Level)
+	case "debug":
+		cW(out, true, bMagenta, b.Level)
+
+	case "error":
+		cW(out, true, bRed, b.Level)
+	}
+
+	fmt.Printf("%s >> %s:%d\n", out, b.File, b.LineNumber)
 }
 
 var (
@@ -77,9 +109,9 @@ var (
 	nYellow = []byte{'\033', '[', '3', '3', 'm'}
 	//nCyan   = []byte{'\033', '[', '3', '6', 'm'}
 	// Bright colors
-	bRed   = []byte{'\033', '[', '3', '1', ';', '1', 'm'}
-	bGreen = []byte{'\033', '[', '3', '2', ';', '1', 'm'}
-	//bYellow  = []byte{'\033', '[', '3', '3', ';', '1', 'm'}
+	bRed     = []byte{'\033', '[', '3', '1', ';', '1', 'm'}
+	bGreen   = []byte{'\033', '[', '3', '2', ';', '1', 'm'}
+	bYellow  = []byte{'\033', '[', '3', '3', ';', '1', 'm'}
 	bBlue    = []byte{'\033', '[', '3', '4', ';', '1', 'm'}
 	bMagenta = []byte{'\033', '[', '3', '5', ';', '1', 'm'}
 	bCyan    = []byte{'\033', '[', '3', '6', ';', '1', 'm'}
@@ -116,4 +148,8 @@ func cW(w io.Writer, useColor bool, color []byte, s string, args ...interface{})
 	if IsTTY && useColor {
 		_, _ = w.Write(reset)
 	}
+}
+
+func reportIt() {
+
 }
