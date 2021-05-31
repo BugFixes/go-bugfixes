@@ -34,8 +34,8 @@ func (b BugFixesLog) DoReporting() {
 	}
 
 	go func() {
-    b.sendLog()
-  }()
+		b.sendLog()
+	}()
 }
 
 func (b BugFixesLog) sendLog() {
@@ -45,6 +45,17 @@ func (b BugFixesLog) sendLog() {
 	bugServer := "https://api.bugfix.es/log"
 	if bugServerEnv := os.Getenv("BUGFIXES_SERVER"); bugServerEnv != "" {
 		bugServer = bugServerEnv
+	}
+
+	if agentKey == "" || agentSecret == "" {
+		fmt.Printf("cant send to server till you have created an agent and set the keys\n")
+		if agentKey == "" {
+			fmt.Printf("env: BUGFIXES_AGENT_KEY missing\n")
+		}
+		if agentSecret == "" {
+			fmt.Printf("env: BUGFIXES_AGENT_SECRET missing\n")
+		}
+		return
 	}
 
 	body, err := json.Marshal(b)
