@@ -15,39 +15,43 @@ import (
 )
 
 type BugFixesLog struct {
-	Log        string          `json:"log"`
-	Level      string          `json:"level"`
-	File       string          `json:"file"`
-	Line       string          `json:"line"`
-	LineNumber int             `json:"line_number"`
-	LogFmt     *logfmt.Encoder `json:"log_fmt"`
-	Stack      []byte          `json:"stack"`
+	FormattedLog string         `json:"log"`
+	Level        string         `json:"level"`
+	File         string         `json:"file"`
+	Line         string         `json:"line"`
+	LineNumber   int            `json:"line_number"`
+	LogFmt       logfmt.Encoder `json:"log_fmt"`
+	Stack        []byte         `json:"stack"`
 
-	Error error `json:"-"`
+	FormattedError error `json:"-"`
+	LocalOnly      bool  `json:"-"`
 }
 
 func (b BugFixesLog) DoReporting() {
-	_, file, line, _ := runtime.Caller(2)
+	skip := 2
+	if b.LocalOnly {
+		skip = 3
+	}
+	_, file, line, _ := runtime.Caller(skip)
 	b.File = file
 	b.LineNumber = line
 	b.Line = strconv.Itoa(line)
 
-	go func() {
-		b.logformat()
-	}()
+	// Log Format
+	b.logFormat()
 
 	b.makePretty()
 	keepLocal := os.Getenv("BUGFIXES_LOCAL_ONLY")
-	if keepLocal == "" || keepLocal == "true" {
+	if keepLocal == "" || keepLocal == "true" || b.LocalOnly {
 		return
 	}
 
-	go func() {
-		b.sendLog()
-	}()
+	// go func() {
+	b.sendLog()
+	// }()
 }
 
-func (b BugFixesLog) logformat() {
+func (b BugFixesLog) logFormat() {
 	out := bytes.Buffer{}
 	lf := logfmt.NewEncoder(&out)
 
@@ -57,7 +61,7 @@ func (b BugFixesLog) logformat() {
 	if err := lf.EncodeKeyval("level", b.Level); err != nil {
 		fmt.Printf("logfmt level: %v", err)
 	}
-	if err := lf.EncodeKeyval("msg", b.Log); err != nil {
+	if err := lf.EncodeKeyval("msg", b.FormattedLog); err != nil {
 		fmt.Printf("logfmt msg: %v", err)
 	}
 	if err := lf.EncodeKeyval("time", time.Now()); err != nil {
@@ -70,7 +74,7 @@ func (b BugFixesLog) logformat() {
 	if err := lf.EndRecord(); err != nil {
 		fmt.Printf("logfmt endrecord: %v", err)
 	}
-	b.LogFmt = lf
+	b.LogFmt = *lf
 }
 
 func (b BugFixesLog) sendLog() {
@@ -96,12 +100,14 @@ func (b BugFixesLog) sendLog() {
 
 	body, err := json.Marshal(b)
 	if err != nil {
-		fmt.Printf("bugfixes sendLog marshal: %+v", err)
+		fmt.Printf("bugfixes sendLog marshal: %+v\n", err)
+		return
 	}
 
 	request, err := http.NewRequest("POST", bugServer, bytes.NewBuffer(body))
 	if err != nil {
-		fmt.Printf("bugfixes sendLog newRequest: %+v", err)
+		fmt.Printf("bugfixes sendLog newRequest: %+v\n", err)
+		return
 	}
 	request.Header.Set("Content-Type", "application/json")
 	request.Header.Set("X-API-KEY", agentKey)
@@ -112,16 +118,20 @@ func (b BugFixesLog) sendLog() {
 	}
 	resp, err := client.Do(request)
 	if err != nil {
-		fmt.Printf("bugfixes sendLog do: %+v", err)
+		fmt.Printf("bugfixes sendLog do: %+v\n", err)
+		return
 	}
-	if err := resp.Body.Close(); err != nil {
-		fmt.Printf("bugfixes sendLog close: %+v", err)
+	if resp != nil && resp.Body != nil {
+		if err := resp.Body.Close(); err != nil {
+			fmt.Printf("bugfixes sendLog close: %+v\n", err)
+			return
+		}
 	}
 }
 
 func (b BugFixesLog) makePretty() {
 	out := &bytes.Buffer{}
-	log := b.Log
+	log := b.FormattedLog
 
 	switch b.Level {
 	case "warn":
@@ -136,7 +146,7 @@ func (b BugFixesLog) makePretty() {
 
 	case "error":
 		cW(out, true, bRed, "Error:")
-		log = b.Error.Error()
+		log = b.FormattedError.Error()
 
 	default:
 		cW(out, true, bWhite, fmt.Sprintf("%s:", b.Level))
