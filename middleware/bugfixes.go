@@ -63,10 +63,11 @@ func sendToBugfixes(rvr interface{}) {
 		return
 	}
 
-	bugServer := "https://api.bugfix.es/bug"
+	bugServer := "https://api.bugfix.es"
 	if bugServerEnv := os.Getenv("BUGFIXES_SERVER"); bugServerEnv != "" {
 		bugServer = bugServerEnv
 	}
+	bugServer = fmt.Sprintf("%s/bug", bugServer)
 
 	body, err := json.Marshal(bug)
 	if err != nil {
