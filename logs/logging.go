@@ -15,13 +15,13 @@ import (
 )
 
 type BugFixesLog struct {
-	FormattedLog string         `json:"log"`
-	Level        string         `json:"level"`
-	File         string         `json:"file"`
-	Line         string         `json:"line"`
-	LineNumber   int            `json:"line_number"`
-	LogFmt       logfmt.Encoder `json:"log_fmt"`
-	Stack        []byte         `json:"stack"`
+	FormattedLog string `json:"log"`
+	Level        string `json:"level"`
+	File         string `json:"file"`
+	Line         string `json:"line"`
+	LineNumber   int    `json:"line_number"`
+	LogFmt       string `json:"log_fmt"`
+	Stack        []byte `json:"stack"`
 
 	FormattedError error `json:"-"`
 	LocalOnly      bool  `json:"-"`
@@ -51,7 +51,7 @@ func (b BugFixesLog) DoReporting() {
 	// }()
 }
 
-func (b BugFixesLog) logFormat() {
+func (b *BugFixesLog) logFormat() {
 	out := bytes.Buffer{}
 	lf := logfmt.NewEncoder(&out)
 
@@ -74,7 +74,8 @@ func (b BugFixesLog) logFormat() {
 	if err := lf.EndRecord(); err != nil {
 		fmt.Printf("logfmt endrecord: %v", err)
 	}
-	b.LogFmt = *lf
+
+	b.LogFmt = out.String()
 }
 
 func (b BugFixesLog) sendLog() {
