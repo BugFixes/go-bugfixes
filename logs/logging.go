@@ -21,9 +21,9 @@ type BugFixesLog struct {
 	Line       string          `json:"line"`
 	LineNumber int             `json:"line_number"`
 	LogFmt     *logfmt.Encoder `json:"log_fmt"`
-	Stack []byte `json:"stack"`
+	Stack      []byte          `json:"stack"`
 
-	Error error  `json:"-"`
+	Error error `json:"-"`
 }
 
 func (b BugFixesLog) DoReporting() {
