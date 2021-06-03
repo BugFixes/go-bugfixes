@@ -36,9 +36,9 @@ func (b BugFixesLog) DoReporting() {
 		b.logformat()
 	}()
 
+  b.makePretty()
 	keepLocal := os.Getenv("BUGFIXES_LOCAL_ONLY")
 	if keepLocal == "" || keepLocal == "true" {
-		b.makePretty()
 		return
 	}
 
