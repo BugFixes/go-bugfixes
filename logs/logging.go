@@ -19,6 +19,7 @@ type BugFixesLog struct {
 	Line       string `json:"line"`
 	LineNumber int    `json:"line_number"`
 	Stack      []byte `json:"-"`
+	Error      error  `json:"-"`
 }
 
 func (b BugFixesLog) DoReporting() {
@@ -84,29 +85,37 @@ func (b BugFixesLog) sendLog() {
 }
 
 func (b BugFixesLog) makePretty() {
-	if b.Stack != nil {
-		PrintPrettyStack(b.Stack)
-		return
-	}
-
 	out := &bytes.Buffer{}
+	log := b.Log
 
 	switch b.Level {
 	case "warn":
-		cW(out, true, bBlue, b.Level)
+		cW(out, true, bBlue, fmt.Sprintf("Warning:"))
 	case "info":
-		cW(out, true, bYellow, b.Level)
+		cW(out, true, bYellow, fmt.Sprintf("Info:"))
 
 	case "log":
-		cW(out, true, bGreen, b.Level)
+		cW(out, true, bGreen, fmt.Sprintf("Log:"))
 	case "debug":
-		cW(out, true, bMagenta, b.Level)
+		cW(out, true, bMagenta, fmt.Sprintf("Debug:"))
 
 	case "error":
-		cW(out, true, bRed, b.Level)
+		cW(out, true, bRed, fmt.Sprintf("Error:"))
+		log = b.Error.Error()
+
+	default:
+		cW(out, true, bWhite, fmt.Sprintf("%s:", b.Level))
 	}
 
-	fmt.Printf("%s >> %s:%d\n", out, b.File, b.LineNumber)
+	fmt.Printf("%s %s:%d >> %s\n", out, b.File, b.LineNumber, log)
+
+	if b.Stack != nil {
+		extra := &bytes.Buffer{}
+		cW(extra, true, bMagenta, fmt.Sprintf("Stack:"))
+		fmt.Printf("%s", extra)
+		PrintPrettyStack(b.Stack)
+		return
+	}
 }
 
 var (

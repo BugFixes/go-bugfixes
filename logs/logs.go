@@ -12,6 +12,7 @@ func Errorf(format string, inputs ...interface{}) error {
 	b := BugFixesLog{
 		Level: "error",
 		Log:   fmt.Sprintf(format, inputs...),
+		Error: fmt.Errorf(format, inputs...),
 	}
 	b.DoReporting()
 
