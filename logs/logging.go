@@ -10,16 +10,20 @@ import (
 	"runtime"
 	"strconv"
 	"time"
+
+	"github.com/go-logfmt/logfmt"
 )
 
 type BugFixesLog struct {
-	Log        string `json:"log"`
-	Level      string `json:"level"`
-	File       string `json:"file"`
-	Line       string `json:"line"`
-	LineNumber int    `json:"line_number"`
-	Stack      []byte `json:"-"`
-	Error      error  `json:"-"`
+	Log        string          `json:"log"`
+	Level      string          `json:"level"`
+	File       string          `json:"file"`
+	Line       string          `json:"line"`
+	LineNumber int             `json:"line_number"`
+	LogFmt     *logfmt.Encoder `json:"logfmt"`
+
+	Stack []byte `json:"-"`
+	Error error  `json:"-"`
 }
 
 func (b BugFixesLog) DoReporting() {
@@ -27,6 +31,10 @@ func (b BugFixesLog) DoReporting() {
 	b.File = file
 	b.LineNumber = line
 	b.Line = strconv.Itoa(line)
+
+	go func() {
+		b.logformat()
+	}()
 
 	keepLocal := os.Getenv("BUGFIXES_LOCAL_ONLY")
 	if keepLocal == "" || keepLocal == "true" {
@@ -37,6 +45,32 @@ func (b BugFixesLog) DoReporting() {
 	go func() {
 		b.sendLog()
 	}()
+}
+
+func (b BugFixesLog) logformat() {
+  out := bytes.Buffer{}
+  lf := logfmt.NewEncoder(&out)
+
+  if err := lf.EncodeKeyval("path", b.File); err != nil {
+    fmt.Printf("logfmt path: %v", err)
+  }
+  if err := lf.EncodeKeyval("level", b.Level); err != nil {
+    fmt.Printf("logfmt level: %v", err)
+  }
+  if err := lf.EncodeKeyval("msg", b.Log); err != nil {
+    fmt.Printf("logfmt msg: %v", err)
+  }
+  if err := lf.EncodeKeyval("time", time.Now()); err != nil {
+    fmt.Printf("logfmt time: %v", err)
+  }
+  if err := lf.EncodeKeyval("line", b.Line); err != nil {
+    fmt.Printf("logfmt line: %v", err)
+  }
+
+  if err := lf.EndRecord(); err != nil {
+    fmt.Printf("logfmt endrecord: %v", err)
+  }
+  b.LogFmt = lf
 }
 
 func (b BugFixesLog) sendLog() {
