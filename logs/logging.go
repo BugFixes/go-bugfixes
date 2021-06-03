@@ -48,29 +48,29 @@ func (b BugFixesLog) DoReporting() {
 }
 
 func (b BugFixesLog) logformat() {
-  out := bytes.Buffer{}
-  lf := logfmt.NewEncoder(&out)
+	out := bytes.Buffer{}
+	lf := logfmt.NewEncoder(&out)
 
-  if err := lf.EncodeKeyval("path", b.File); err != nil {
-    fmt.Printf("logfmt path: %v", err)
-  }
-  if err := lf.EncodeKeyval("level", b.Level); err != nil {
-    fmt.Printf("logfmt level: %v", err)
-  }
-  if err := lf.EncodeKeyval("msg", b.Log); err != nil {
-    fmt.Printf("logfmt msg: %v", err)
-  }
-  if err := lf.EncodeKeyval("time", time.Now()); err != nil {
-    fmt.Printf("logfmt time: %v", err)
-  }
-  if err := lf.EncodeKeyval("line", b.Line); err != nil {
-    fmt.Printf("logfmt line: %v", err)
-  }
+	if err := lf.EncodeKeyval("path", b.File); err != nil {
+		fmt.Printf("logfmt path: %v", err)
+	}
+	if err := lf.EncodeKeyval("level", b.Level); err != nil {
+		fmt.Printf("logfmt level: %v", err)
+	}
+	if err := lf.EncodeKeyval("msg", b.Log); err != nil {
+		fmt.Printf("logfmt msg: %v", err)
+	}
+	if err := lf.EncodeKeyval("time", time.Now()); err != nil {
+		fmt.Printf("logfmt time: %v", err)
+	}
+	if err := lf.EncodeKeyval("line", b.Line); err != nil {
+		fmt.Printf("logfmt line: %v", err)
+	}
 
-  if err := lf.EndRecord(); err != nil {
-    fmt.Printf("logfmt endrecord: %v", err)
-  }
-  b.LogFmt = lf
+	if err := lf.EndRecord(); err != nil {
+		fmt.Printf("logfmt endrecord: %v", err)
+	}
+	b.LogFmt = lf
 }
 
 func (b BugFixesLog) sendLog() {
@@ -124,17 +124,17 @@ func (b BugFixesLog) makePretty() {
 
 	switch b.Level {
 	case "warn":
-		cW(out, true, bBlue, fmt.Sprintf("Warning:"))
+		cW(out, true, bBlue, "Warning:")
 	case "info":
-		cW(out, true, bYellow, fmt.Sprintf("Info:"))
+		cW(out, true, bYellow, "Info:")
 
 	case "log":
-		cW(out, true, bGreen, fmt.Sprintf("Log:"))
+		cW(out, true, bGreen, "Log:")
 	case "debug":
-		cW(out, true, bMagenta, fmt.Sprintf("Debug:"))
+		cW(out, true, bMagenta, "Debug:")
 
 	case "error":
-		cW(out, true, bRed, fmt.Sprintf("Error:"))
+		cW(out, true, bRed, "Error:")
 		log = b.Error.Error()
 
 	default:
@@ -145,7 +145,7 @@ func (b BugFixesLog) makePretty() {
 
 	if b.Stack != nil {
 		extra := &bytes.Buffer{}
-		cW(extra, true, bMagenta, fmt.Sprintf("Stack:"))
+		cW(extra, true, bMagenta, "Stack:")
 		fmt.Printf("%s", extra)
 		PrintPrettyStack(b.Stack)
 		return
