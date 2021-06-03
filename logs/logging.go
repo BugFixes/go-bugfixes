@@ -20,10 +20,10 @@ type BugFixesLog struct {
 	File       string          `json:"file"`
 	Line       string          `json:"line"`
 	LineNumber int             `json:"line_number"`
-	LogFmt     *logfmt.Encoder `json:"logfmt"`
+	LogFmt     *logfmt.Encoder `json:"log_fmt"`
+	Stack      []byte          `json:"stack"`
 
-	Stack []byte `json:"-"`
-	Error error  `json:"-"`
+	Error error `json:"-"`
 }
 
 func (b BugFixesLog) DoReporting() {
@@ -77,10 +77,11 @@ func (b BugFixesLog) sendLog() {
 	agentKey := os.Getenv("BUGFIXES_AGENT_KEY")
 	agentSecret := os.Getenv("BUGFIXES_AGENT_SECRET")
 
-	bugServer := "https://api.bugfix.es/log"
+	bugServer := "https://api.bugfix.es"
 	if bugServerEnv := os.Getenv("BUGFIXES_SERVER"); bugServerEnv != "" {
 		bugServer = bugServerEnv
 	}
+	bugServer = fmt.Sprintf("%s/log", bugServer)
 
 	if agentKey == "" || agentSecret == "" {
 		fmt.Printf("cant send to server till you have created an agent and set the keys\n")
