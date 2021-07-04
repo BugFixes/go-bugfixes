@@ -11,6 +11,17 @@ func Local() BugFixesLog {
 	}
 }
 
+func (b BugFixesLog) Unwrap(e error) error {
+  u, ok := e.(interface {
+    Unwrap() error
+  })
+  if !ok {
+    return nil
+  }
+
+  return u.Unwrap()
+}
+
 func (b BugFixesLog) Error(inputs ...interface{}) error {
 	return b.Errorf("%w", inputs...)
 }
