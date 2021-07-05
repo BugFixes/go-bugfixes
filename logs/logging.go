@@ -14,19 +14,18 @@ import (
 	"github.com/go-logfmt/logfmt"
 )
 
-func (b BugFixesLog) Unwrap(e error) error {
-  u, ok := e.(interface {
-    Unwrap() error
-  })
-  if !ok {
-    return nil
-  }
+func (b BugFixes) Unwrap(e error) error {
+	u, ok := e.(interface {
+		Unwrap() error
+	})
+	if !ok {
+		return nil
+	}
 
-  return u.Unwrap()
+	return u.Unwrap()
 }
 
-
-type BugFixesLog struct {
+type BugFixes struct {
 	FormattedLog string `json:"log"`
 	Level        string `json:"level"`
 	File         string `json:"file"`
@@ -38,22 +37,21 @@ type BugFixesLog struct {
 	FormattedError error `json:"-"`
 	LocalOnly      bool  `json:"-"`
 
-	Bug BugFixesLog
+	Bug string
 	Err error
 }
 
-func NewBugFixesLog(b BugFixesLog, err error) error {
-  if err == nil {
-    return nil
-  }
+func NewBugFixesLog(b BugFixes, err error) error {
+	if err == nil {
+		return nil
+	}
 
-  return &BugFixesLog{
-    Bug: b,
-    Err: err,
-  }
+	return &BugFixes{
+		Err: err,
+	}
 }
 
-func (b BugFixesLog) DoReporting() {
+func (b BugFixes) DoReporting() {
 	skip := 2
 	if b.LocalOnly {
 		skip = 3
@@ -77,7 +75,7 @@ func (b BugFixesLog) DoReporting() {
 	// }()
 }
 
-func (b *BugFixesLog) logFormat() {
+func (b *BugFixes) logFormat() {
 	out := bytes.Buffer{}
 	lf := logfmt.NewEncoder(&out)
 
@@ -104,7 +102,7 @@ func (b *BugFixesLog) logFormat() {
 	b.LogFmt = out.String()
 }
 
-func (b BugFixesLog) sendLog() {
+func (b BugFixes) sendLog() {
 	agentKey := os.Getenv("BUGFIXES_AGENT_KEY")
 	agentSecret := os.Getenv("BUGFIXES_AGENT_SECRET")
 
@@ -156,7 +154,7 @@ func (b BugFixesLog) sendLog() {
 	}
 }
 
-func (b BugFixesLog) makePretty() {
+func (b BugFixes) makePretty() {
 	out := &bytes.Buffer{}
 	log := b.FormattedLog
 

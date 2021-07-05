@@ -1,24 +1,24 @@
 package logs
 
 import (
-  "fmt"
-  "runtime/debug"
+	"fmt"
+	"runtime/debug"
 )
 
-func Local() BugFixesLog {
-	return BugFixesLog{
+func Local() BugFixes {
+	return BugFixes{
 		LocalOnly: true,
 	}
 }
 
-func (b BugFixesLog) Error() string {
-  return fmt.Sprintf("%+v: %s", b.Bug, b.Err.Error())
+func (b BugFixes) Error() string {
+	return fmt.Sprintf("%s: %s", b.Bug, b.Err.Error())
 }
 
 func Error(inputs ...interface{}) error {
 	return Errorf("%w", inputs...)
 }
-func (b BugFixesLog) Errorf(format string, inputs ...interface{}) error {
+func (b BugFixes) Errorf(format string, inputs ...interface{}) error {
 	b.Level = "error"
 	b.FormattedLog = fmt.Sprintf(format, inputs...)
 	b.FormattedError = fmt.Errorf(format, inputs...)
@@ -27,7 +27,7 @@ func (b BugFixesLog) Errorf(format string, inputs ...interface{}) error {
 	return fmt.Errorf(format, inputs...)
 }
 func Errorf(format string, inputs ...interface{}) error {
-	b := BugFixesLog{
+	b := BugFixes{
 		Level:          "error",
 		FormattedLog:   fmt.Sprintf(format, inputs...),
 		FormattedError: fmt.Errorf(format, inputs...),
@@ -37,39 +37,39 @@ func Errorf(format string, inputs ...interface{}) error {
 	return fmt.Errorf(format, inputs...)
 }
 
-func (b BugFixesLog) Info(inputs ...interface{}) {
+func (b BugFixes) Info(inputs ...interface{}) {
 	b.Infof("%v", inputs...)
 }
 func Info(inputs ...interface{}) {
 	Infof("%v", inputs...)
 }
-func (b BugFixesLog) Infof(format string, inputs ...interface{}) {
+func (b BugFixes) Infof(format string, inputs ...interface{}) {
 	b.Level = "info"
 	b.FormattedLog = fmt.Sprintf(format, inputs...)
 	b.DoReporting()
 }
 func Infof(format string, inputs ...interface{}) {
-	b := BugFixesLog{
+	b := BugFixes{
 		Level:        "info",
 		FormattedLog: fmt.Sprintf(format, inputs...),
 	}
 	b.DoReporting()
 }
 
-func (b BugFixesLog) Debug(inputs ...interface{}) {
+func (b BugFixes) Debug(inputs ...interface{}) {
 	b.Debugf("%v", inputs...)
 }
 func Debug(inputs ...interface{}) {
 	Debugf("%v", inputs...)
 }
-func (b BugFixesLog) Debugf(format string, inputs ...interface{}) {
+func (b BugFixes) Debugf(format string, inputs ...interface{}) {
 	b.Level = "debug"
 	b.FormattedLog = fmt.Sprintf(format, inputs...)
 	b.Stack = debug.Stack()
 	b.DoReporting()
 }
 func Debugf(format string, inputs ...interface{}) {
-	b := BugFixesLog{
+	b := BugFixes{
 		Level:        "debug",
 		FormattedLog: fmt.Sprintf(format, inputs...),
 		Stack:        debug.Stack(),
@@ -77,38 +77,38 @@ func Debugf(format string, inputs ...interface{}) {
 	b.DoReporting()
 }
 
-func (b BugFixesLog) Log(inputs ...interface{}) {
+func (b BugFixes) Log(inputs ...interface{}) {
 	b.Logf("%v", inputs...)
 }
 func Log(inputs ...interface{}) {
 	Logf("%v", inputs...)
 }
-func (b BugFixesLog) Logf(format string, inputs ...interface{}) {
+func (b BugFixes) Logf(format string, inputs ...interface{}) {
 	b.Level = "log"
 	b.FormattedLog = fmt.Sprintf(format, inputs...)
 	b.DoReporting()
 }
 func Logf(format string, inputs ...interface{}) {
-	b := BugFixesLog{
+	b := BugFixes{
 		Level:        "log",
 		FormattedLog: fmt.Sprintf(format, inputs...),
 	}
 	b.DoReporting()
 }
 
-func (b BugFixesLog) Warn(inputs ...interface{}) {
+func (b BugFixes) Warn(inputs ...interface{}) {
 	b.Warnf("%v", inputs...)
 }
 func Warn(inputs ...interface{}) {
 	Warnf("%v", inputs...)
 }
-func (b BugFixesLog) Warnf(format string, inputs ...interface{}) {
+func (b BugFixes) Warnf(format string, inputs ...interface{}) {
 	b.Level = "warn"
 	b.FormattedLog = fmt.Sprintf(format, inputs...)
 	b.DoReporting()
 }
 func Warnf(format string, inputs ...interface{}) {
-	b := BugFixesLog{
+	b := BugFixes{
 		Level:        "warn",
 		FormattedLog: fmt.Sprintf(format, inputs...),
 	}
