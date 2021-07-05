@@ -1,8 +1,8 @@
 package logs
 
 import (
-	"fmt"
-	"runtime/debug"
+  "fmt"
+  "runtime/debug"
 )
 
 func Local() BugFixesLog {
@@ -11,20 +11,10 @@ func Local() BugFixesLog {
 	}
 }
 
-func (b BugFixesLog) Unwrap(e error) error {
-  u, ok := e.(interface {
-    Unwrap() error
-  })
-  if !ok {
-    return nil
-  }
-
-  return u.Unwrap()
+func (b BugFixesLog) Error() string {
+  return fmt.Sprintf("%+v: %s", b.Bug, b.Err.Error())
 }
 
-func (b BugFixesLog) Error(inputs ...interface{}) error {
-	return b.Errorf("%w", inputs...)
-}
 func Error(inputs ...interface{}) error {
 	return Errorf("%w", inputs...)
 }

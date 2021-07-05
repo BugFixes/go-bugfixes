@@ -14,6 +14,18 @@ import (
 	"github.com/go-logfmt/logfmt"
 )
 
+func (b BugFixesLog) Unwrap(e error) error {
+  u, ok := e.(interface {
+    Unwrap() error
+  })
+  if !ok {
+    return nil
+  }
+
+  return u.Unwrap()
+}
+
+
 type BugFixesLog struct {
 	FormattedLog string `json:"log"`
 	Level        string `json:"level"`
@@ -25,6 +37,20 @@ type BugFixesLog struct {
 
 	FormattedError error `json:"-"`
 	LocalOnly      bool  `json:"-"`
+
+	Bug BugFixesLog
+	Err error
+}
+
+func NewBugFixesLog(b BugFixesLog, err error) error {
+  if err == nil {
+    return nil
+  }
+
+  return &BugFixesLog{
+    Bug: b,
+    Err: err,
+  }
 }
 
 func (b BugFixesLog) DoReporting() {
