@@ -41,7 +41,7 @@ type BugFixes struct {
 	Err error
 }
 
-func NewBugFixesLog(b BugFixes, err error) error {
+func NewBugFixes(b BugFixes, err error) error {
 	if err == nil {
 		return nil
 	}
