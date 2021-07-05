@@ -51,6 +51,79 @@ func NewBugFixes(b BugFixes, err error) error {
 	}
 }
 
+const (
+	LOG   = "log"
+	DEBUG = "debug"
+
+	INFO = "info"
+	WARN = "warn"
+
+	ERROR = "error"
+
+	CRASH = "crash"
+	PANIC = "panic"
+	FATAL = "fatal"
+
+	UNKNOWN = "unknown"
+)
+
+func GetLevelLog() int {
+	return 1
+}
+
+func GetLevelInfo() int {
+	return 2
+}
+
+func GetLevelError() int {
+	return 3
+}
+
+func GetLevelCrash() int {
+	return 4
+}
+
+func GetLevelUnknown() int {
+	return 5
+}
+
+// ConvertLevelFromString
+// nolint: gocyclo
+func ConvertLevelFromString(s string) int {
+	switch s {
+	case LOG:
+	case DEBUG:
+		return GetLevelLog()
+
+	case INFO:
+	case WARN:
+		return GetLevelInfo()
+
+	case ERROR:
+		return GetLevelError()
+
+	case CRASH:
+	case PANIC:
+	case FATAL:
+		return GetLevelCrash()
+
+	case UNKNOWN:
+		return GetLevelUnknown()
+
+	default:
+		lvl, err := strconv.Atoi(s)
+		if err != nil {
+			return GetLevelUnknown()
+		}
+		if lvl >= 5 {
+			return GetLevelUnknown()
+		}
+		return lvl
+	}
+
+	return GetLevelUnknown()
+}
+
 func (b BugFixes) DoReporting() {
 	skip := 2
 	if b.LocalOnly {
@@ -64,15 +137,23 @@ func (b BugFixes) DoReporting() {
 	// Log Format
 	b.logFormat()
 
+	// Make it pretty
 	b.makePretty()
+
+	// Do we keep it local no matter what
 	keepLocal := os.Getenv("BUGFIXES_LOCAL_ONLY")
 	if keepLocal == "" || keepLocal == "true" || b.LocalOnly {
 		return
 	}
 
-	// go func() {
+	// Log level
+	reportLogLevel := ConvertLevelFromString(os.Getenv("BUGFIXES_LOG_LEVEL"))
+	logLevel := ConvertLevelFromString(b.Level)
+	if reportLogLevel > logLevel {
+		return
+	}
+
 	b.sendLog()
-	// }()
 }
 
 func (b *BugFixes) logFormat() {
