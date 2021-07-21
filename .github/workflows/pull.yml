@@ -1,12 +1,8 @@
 name: Pull Requests
 on:
   push:
-    branches:
-      - '!main'
-      - '*'
-  check_suite:
-    types:
-      - completed
+    branches-ignore:
+      - main
   pull_request:
     types:
       - opened
@@ -15,7 +11,8 @@ on:
       - synchronize
 
 jobs:
-  lint:
+  test:
+    timeout-minutes: 5
     runs-on: ubuntu-latest
     steps:
       - uses: actions/setup-go@v1
@@ -28,3 +25,12 @@ jobs:
         with:
           version: v1.38
           args: --config ./configs/golangci.yml
+      - name: test
+        run: go test -v -race -bench=./... -benchmem -timeout=120s -bench=./... ./...
+  automerge:
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: fastify/github-action-merge-dependabot@v2.1.1
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}

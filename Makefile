@@ -14,7 +14,7 @@ build: lint ## Build the app
 
 .PHONY: test
 test: lint ## Test the app
-	go test -v -race -bench=./... -benchmem -timeout=120s -cover -coverprofile=./test/coverage.txt -bench=./... ./...
+	go test -v -race -bench=./... -benchmem -timeout=120s -cover -coverprofile=./coverage.txt -bench=./... ./...
 
 .PHONY: run
 run: build ## Build and run

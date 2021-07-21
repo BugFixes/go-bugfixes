@@ -67,24 +67,32 @@ const (
 	UNKNOWN = "unknown"
 )
 
+const (
+	LevelLog     = 1
+	LevelInfo    = 2
+	LevelError   = 3
+	LevelCrash   = 4
+	LevelUnknown = 5
+)
+
 func GetLevelLog() int {
-	return 1
+	return LevelLog
 }
 
 func GetLevelInfo() int {
-	return 2
+	return LevelInfo
 }
 
 func GetLevelError() int {
-	return 3
+	return LevelError
 }
 
 func GetLevelCrash() int {
-	return 4
+	return LevelCrash
 }
 
 func GetLevelUnknown() int {
-	return 5
+	return LevelUnknown
 }
 
 // ConvertLevelFromString
@@ -92,10 +100,12 @@ func GetLevelUnknown() int {
 func ConvertLevelFromString(s string) int {
 	switch s {
 	case LOG:
+		return GetLevelLog()
 	case DEBUG:
 		return GetLevelLog()
 
 	case INFO:
+		return GetLevelInfo()
 	case WARN:
 		return GetLevelInfo()
 
@@ -103,7 +113,9 @@ func ConvertLevelFromString(s string) int {
 		return GetLevelError()
 
 	case CRASH:
+		return GetLevelCrash()
 	case PANIC:
+		return GetLevelCrash()
 	case FATAL:
 		return GetLevelCrash()
 
@@ -120,8 +132,6 @@ func ConvertLevelFromString(s string) int {
 		}
 		return lvl
 	}
-
-	return GetLevelUnknown()
 }
 
 func (b BugFixes) DoReporting() {
