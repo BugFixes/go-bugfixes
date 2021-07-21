@@ -2,4 +2,7 @@ module github.com/bugfixes/go-bugfixes
 
 go 1.16
 
-require github.com/go-logfmt/logfmt v0.5.0 // indirect
+require (
+	github.com/go-logfmt/logfmt v0.5.0
+	github.com/stretchr/testify v1.7.0 // indirect
+)
