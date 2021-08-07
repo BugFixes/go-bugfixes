@@ -9,7 +9,8 @@ import (
 	"os"
 	"runtime"
 	"strconv"
-	"time"
+  "strings"
+  "time"
 
 	"github.com/go-logfmt/logfmt"
 )
@@ -134,15 +135,22 @@ func ConvertLevelFromString(s string) int {
 	}
 }
 
+func (b *BugFixes) skipDepth(depth int) {
+  _, file, line, _ := runtime.Caller(depth)
+  b.File = file
+  b.LineNumber = line
+  b.Line = strconv.Itoa(line)
+}
+
 func (b BugFixes) DoReporting() {
-	skip := 2
-	if b.LocalOnly {
-		skip = 3
-	}
-	_, file, line, _ := runtime.Caller(skip)
-	b.File = file
-	b.LineNumber = line
-	b.Line = strconv.Itoa(line)
+  b.skipDepth(3)
+  if b.LocalOnly {
+    b.skipDepth(4)
+  }
+
+  if notDeepEnough := strings.Contains(b.File, "logs.go"); notDeepEnough {
+    b.skipDepth(4)
+  }
 
 	// Log Format
 	b.logFormat()
