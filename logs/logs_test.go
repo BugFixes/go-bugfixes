@@ -72,7 +72,7 @@ func TestBugFixes_Errorf(t *testing.T) {
 
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			response := logs.Local().Errorf(test.format, test.inputs)
+			response := logs.Local(3).Errorf(test.format, test.inputs)
 
 			if passed := assert.IsType(t, test.expect, response); !passed {
 				t.Errorf("%s type failed: %T, expect %T", test.name, response, test.expect)
@@ -101,7 +101,7 @@ func TestBugFixes_Infof(t *testing.T) {
 
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			response := logs.Local().Infof(test.format, test.inputs)
+			response := logs.Local(3).Infof(test.format, test.inputs)
 
 			if passed := assert.IsType(t, test.expect, response); !passed {
 				t.Errorf("%s type failed: %T, expect %T", test.name, response, test.expect)
@@ -130,7 +130,7 @@ func TestBugFixes_Debugf(t *testing.T) {
 
 	for _, test := range tests {
 		t.Run(t.Name(), func(t *testing.T) {
-			response := logs.Local().Debugf(test.format, test.inputs)
+			response := logs.Local(3).Debugf(test.format, test.inputs)
 
 			if passed := assert.IsType(t, test.expect, response); !passed {
 				t.Errorf("%s type failed: %T, expect %T", test.name, response, test.expect)
@@ -159,7 +159,7 @@ func TestBugFixes_Logf(t *testing.T) {
 
 	for _, test := range tests {
 		t.Run(t.Name(), func(t *testing.T) {
-			response := logs.Local().Logf(test.format, test.inputs)
+			response := logs.Local(3).Logf(test.format, test.inputs)
 
 			if passed := assert.IsType(t, test.expect, response); !passed {
 				t.Errorf("%s type failed: %T, expect %T", test.name, response, test.expect)
@@ -188,7 +188,7 @@ func TestBugFixes_Warnf(t *testing.T) {
 
 	for _, test := range tests {
 		t.Run(t.Name(), func(t *testing.T) {
-			response := logs.Local().Warnf(test.format, test.inputs)
+			response := logs.Local(3).Warnf(test.format, test.inputs)
 
 			if passed := assert.IsType(t, test.expect, response); !passed {
 				t.Errorf("%s type failed: %T, expect %T", test.name, response, test.expect)

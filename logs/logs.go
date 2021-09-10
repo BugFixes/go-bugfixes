@@ -5,7 +5,14 @@ import (
 	"runtime/debug"
 )
 
-func Local() BugFixes {
+func Local(skipDepthOverride ...int) BugFixes {
+	if len(skipDepthOverride) > 0 && skipDepthOverride[0] != 0 {
+		return BugFixes{
+			LocalOnly:         true,
+			SkipDepthOverride: skipDepthOverride[0],
+		}
+	}
+
 	return BugFixes{
 		LocalOnly: true,
 	}

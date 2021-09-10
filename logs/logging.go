@@ -15,6 +15,11 @@ import (
 	"github.com/go-logfmt/logfmt"
 )
 
+const (
+	skipDepthLocal   = 4
+	skipDepthGeneral = 3
+)
+
 func (b BugFixes) Unwrap(e error) error {
 	u, ok := e.(interface {
 		Unwrap() error
@@ -38,8 +43,9 @@ type BugFixes struct {
 	FormattedError error `json:"-"`
 	LocalOnly      bool  `json:"-"`
 
-	Bug string
-	Err error
+	Bug               string
+	Err               error
+	SkipDepthOverride int
 }
 
 func NewBugFixes(b BugFixes, err error) error {
@@ -143,13 +149,17 @@ func (b *BugFixes) skipDepth(depth int) {
 }
 
 func (b BugFixes) DoReporting() {
-	b.skipDepth(3)
+	b.skipDepth(skipDepthGeneral)
 	if b.LocalOnly {
-		b.skipDepth(4)
+		if b.SkipDepthOverride != 0 {
+			b.skipDepth(b.SkipDepthOverride)
+		} else {
+			b.skipDepth(skipDepthLocal)
+		}
 	}
 
 	if notDeepEnough := strings.Contains(b.File, "logs.go"); notDeepEnough {
-		b.skipDepth(4)
+		b.skipDepth(skipDepthLocal)
 	}
 
 	// Log Format
