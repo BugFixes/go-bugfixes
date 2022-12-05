@@ -155,7 +155,7 @@ func (b BugFixes) DoReporting() {
 
 	skipDepthOverride := defaultSkipDepth
 	for {
-		if notDeepEnough := strings.Contains(b.File, "go-bugfixes/logs/logs.go"); notDeepEnough {
+		if notDeepEnough := strings.Contains(b.File, "logs/logs.go"); notDeepEnough {
 			b.skipDepth(skipDepthOverride + 1)
 		} else {
 			break
