@@ -23,7 +23,7 @@ jobs:
           fetch-depth: 1
       - uses: golangci/golangci-lint-action@v2
         with:
-          version: v1.38
+          version: v1.48
           args: --config ./configs/golangci.yml
       - name: test
         run: go test -v -race -bench=./... -benchmem -timeout=120s -bench=./... ./...
@@ -31,6 +31,6 @@ jobs:
     needs: test
     runs-on: ubuntu-latest
     steps:
-      - uses: fastify/github-action-merge-dependabot@v2.1.1
+      - uses: fastify/github-action-merge-dependabot@v3
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}

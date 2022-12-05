@@ -151,15 +151,20 @@ func (b *BugFixes) skipDepth(depth int) {
 func (b BugFixes) DoReporting() {
 	b.skipDepth(skipDepthGeneral)
 	if b.LocalOnly {
+		b.skipDepth(skipDepthLocal)
+
 		if b.SkipDepthOverride != 0 {
 			b.skipDepth(b.SkipDepthOverride)
-		} else {
-			b.skipDepth(skipDepthLocal)
 		}
 	}
 
-	if notDeepEnough := strings.Contains(b.File, "logs.go"); notDeepEnough {
-		b.skipDepth(skipDepthLocal)
+	skipDepth := skipDepthLocal
+	for {
+		if notDeepEnough := strings.Contains(b.File, "logs.go"); notDeepEnough {
+			b.skipDepth(skipDepth + 1)
+		} else {
+			break
+		}
 	}
 
 	// Log Format
