@@ -16,8 +16,7 @@ import (
 )
 
 const (
-	skipDepthLocal   = 4
-	skipDepthGeneral = 3
+	skipDepth = 3
 )
 
 func (b BugFixes) Unwrap(e error) error {
@@ -149,19 +148,15 @@ func (b *BugFixes) skipDepth(depth int) {
 }
 
 func (b BugFixes) DoReporting() {
-	b.skipDepth(skipDepthGeneral)
-	if b.LocalOnly {
-		b.skipDepth(skipDepthLocal)
-
-		if b.SkipDepthOverride != 0 {
-			b.skipDepth(b.SkipDepthOverride)
-		}
+	b.skipDepth(skipDepth)
+	if b.SkipDepthOverride != 0 {
+		b.skipDepth(b.SkipDepthOverride)
 	}
 
-	skipDepth := skipDepthLocal
+	skipDepthOverride := skipDepth
 	for {
 		if notDeepEnough := strings.Contains(b.File, "logs.go"); notDeepEnough {
-			b.skipDepth(skipDepth + 1)
+			b.skipDepth(skipDepthOverride + 1)
 		} else {
 			break
 		}
