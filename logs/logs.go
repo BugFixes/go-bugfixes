@@ -120,3 +120,10 @@ func Warnf(format string, inputs ...interface{}) string {
 }
 
 // </editor-fold>
+
+func (b BugFixes) Fatal(inputs ...interface{}) {
+	b.Level = "fatal"
+	b.FormattedLog = fmt.Sprintf("%v", inputs...)
+	b.DoReporting()
+	panic(b)
+}
