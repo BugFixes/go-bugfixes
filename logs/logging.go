@@ -75,66 +75,49 @@ const (
 
 const (
 	LevelLog     = 1
-	LevelInfo    = 2
-	LevelError   = 3
-	LevelCrash   = 4
-	LevelUnknown = 5
+	LevelDebug   = 2
+	LevelInfo    = 3
+	LevelWarn    = 4
+	LevelError   = 5
+	LevelCrash   = 6
+	LevelUnknown = 9
 )
-
-func GetLevelLog() int {
-	return LevelLog
-}
-
-func GetLevelInfo() int {
-	return LevelInfo
-}
-
-func GetLevelError() int {
-	return LevelError
-}
-
-func GetLevelCrash() int {
-	return LevelCrash
-}
-
-func GetLevelUnknown() int {
-	return LevelUnknown
-}
 
 // ConvertLevelFromString
 // nolint: gocyclo
 func ConvertLevelFromString(s string) int {
 	switch s {
 	case LOG:
-		return GetLevelLog()
+		return LevelLog
 	case DEBUG:
-		return GetLevelLog()
+		return LevelDebug
 
 	case INFO:
-		return GetLevelInfo()
+		return LevelInfo
+
 	case WARN:
-		return GetLevelInfo()
+		return LevelWarn
 
 	case ERROR:
-		return GetLevelError()
+		return LevelError
 
 	case CRASH:
-		return GetLevelCrash()
+		return LevelCrash
 	case PANIC:
-		return GetLevelCrash()
+		return LevelCrash
 	case FATAL:
-		return GetLevelCrash()
+		return LevelCrash
 
 	case UNKNOWN:
-		return GetLevelUnknown()
+		return LevelUnknown
 
 	default:
 		lvl, err := strconv.Atoi(s)
 		if err != nil {
-			return GetLevelUnknown()
+			return LevelUnknown
 		}
-		if lvl >= 5 {
-			return GetLevelUnknown()
+		if lvl >= LevelUnknown {
+			return LevelUnknown
 		}
 		return lvl
 	}
