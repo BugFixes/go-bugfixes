@@ -75,11 +75,11 @@ const (
 
 const (
 	LevelLog     = 1
-	LevelDebug   = 2
-	LevelInfo    = 3
-	LevelWarn    = 4
-	LevelError   = 5
-	LevelCrash   = 6
+	LevelDebug   = 1
+	LevelInfo    = 2
+	LevelWarn    = 3
+	LevelError   = 4
+	LevelCrash   = 5
 	LevelUnknown = 9
 )
 
