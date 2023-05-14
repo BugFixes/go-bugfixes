@@ -287,7 +287,12 @@ func (b BugFixes) makePretty() {
 		cW(out, true, bWhite, fmt.Sprintf("%s:", b.Level))
 	}
 
-	fmt.Printf("%s %s:%d >> %s\n", out, b.File, b.LineNumber, log)
+	// print to stdout if the level is high enough
+	reportLogLevel := ConvertLevelFromString(os.Getenv("BUGFIXES_LOG_LEVEL"))
+	logLevel := ConvertLevelFromString(b.Level)
+	if logLevel >= reportLogLevel || reportLogLevel == LevelUnknown {
+		fmt.Printf("%s %s:%d >> %s\n", out, b.File, b.LineNumber, log)
+	}
 
 	if b.Stack != nil {
 		extra := &bytes.Buffer{}
