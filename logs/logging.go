@@ -274,7 +274,7 @@ func (b BugFixes) makePretty() {
 	reportLogLevel := ConvertLevelFromString(os.Getenv("BUGFIXES_LOG_LEVEL"))
 	logLevel := ConvertLevelFromString(b.Level)
 	if logLevel >= reportLogLevel || reportLogLevel == LevelUnknown || b.LocalOnly {
-		fmt.Printf("%s %s >> %s:%d >> %s\n", out, time.Now().Format("2017-09-07 17:06:06"), b.File, b.LineNumber, log)
+		fmt.Printf("%s %s >> %s:%d >> %s\n", out, time.Now().Format("2006-01-02 15:04:05"), b.File, b.LineNumber, log)
 	}
 
 	if b.Stack != nil {

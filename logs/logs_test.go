@@ -33,7 +33,7 @@ func TestConvertLevelFromString(t *testing.T) {
 		{
 			name:   "warning",
 			level:  "warn",
-			expect: logs.LevelInfo,
+			expect: logs.LevelWarn,
 		},
 		{
 			name:   "unknown",
