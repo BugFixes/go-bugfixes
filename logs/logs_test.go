@@ -4,9 +4,8 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/stretchr/testify/assert"
-
 	"github.com/bugfixes/go-bugfixes/logs"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestConvertLevelFromString(t *testing.T) {
