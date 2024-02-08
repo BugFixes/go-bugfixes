@@ -6,57 +6,6 @@ import (
 	"strings"
 )
 
-//func SkipLog(level string) bool {
-//	type LogLevel struct {
-//		String string
-//		Int    int
-//	}
-//	logLevels := []LogLevel{
-//		{"log", 0},
-//		{"debug", 1},
-//		{"info", 2},
-//		{"warn", 3},
-//		{"error", 4},
-//		{"fatal", 5},
-//		{"unknown", 9},
-//	}
-//
-//	// default log level
-//	logLevel := 0
-//	appLogLevel := 0
-//
-//	logLevelAppRead := os.Getenv("LOG_LEVEL")
-//	if logLevelAppRead != "" {
-//		i, err := strconv.Atoi(logLevelAppRead)
-//		if err != nil {
-//			appLogLevel = 0
-//		} else {
-//			appLogLevel = i
-//		}
-//	}
-//	i, err := strconv.Atoi(level)
-//	if err != nil {
-//		logLevel = 0
-//	} else {
-//		logLevel = i
-//	}
-//
-//	for _, logLevel := range logLevels {
-//		if logLevel.String == level {
-//			return false
-//		}
-//		if logLevel.Int == appLogLevel {
-//			return false
-//		}
-//	}
-//
-//	if logLevel >= appLogLevel {
-//		return false
-//	}
-//
-//	return true
-//}
-
 func Local(skipDepthOverride ...int) BugFixes {
 	if len(skipDepthOverride) > 0 && skipDepthOverride[0] != 0 {
 		return BugFixes{
@@ -96,16 +45,16 @@ func Errorf(format string, inputs ...interface{}) error {
 
 // </editor-fold>
 
-// <editor-fold desc="Info">
+// Info <editor-fold desc="Info">
 func (b BugFixes) Info(inputs ...interface{}) string {
 	format := strings.Repeat("%v, ", len(inputs))
 	format = strings.TrimRight(format, ", ") // remove trailing comma and space
 	return b.Infof(format, inputs...)
 }
-func Info(inputs ...interface{}) {
+func Info(inputs ...interface{}) string {
 	format := strings.Repeat("%v, ", len(inputs))
 	format = strings.TrimRight(format, ", ") // remove trailing comma and space
-	Infof(format, inputs...)
+	return Infof(format, inputs...)
 }
 func (b BugFixes) Infof(format string, inputs ...interface{}) string {
 	b.Level = "info"
@@ -122,7 +71,7 @@ func Infof(format string, inputs ...interface{}) string {
 
 // </editor-fold>
 
-// <editor-fold desc="Debug">
+// Debug <editor-fold desc="Debug">
 func (b BugFixes) Debug(inputs ...interface{}) string {
 	format := strings.Repeat("%v, ", len(inputs))
 	format = strings.TrimRight(format, ", ") // remove trailing comma and space
@@ -149,7 +98,7 @@ func Debugf(format string, inputs ...interface{}) string {
 
 // </editor-fold>
 
-// <editor-fold desc="Log">
+// Log <editor-fold desc="Log">
 func (b BugFixes) Log(inputs ...interface{}) string {
 	format := strings.Repeat("%v, ", len(inputs))
 	format = strings.TrimRight(format, ", ") // remove trailing comma and space
@@ -175,7 +124,7 @@ func Logf(format string, inputs ...interface{}) string {
 
 // </editor-fold>
 
-// <editor-fold desc="Warn">
+// Warn <editor-fold desc="Warn">
 func (b BugFixes) Warn(inputs ...interface{}) string {
 	format := strings.Repeat("%v, ", len(inputs))
 	format = strings.TrimRight(format, ", ") // remove trailing comma and space

@@ -26,11 +26,10 @@ If you use Chi, Gorilla or multiple other http server packages that support midd
 package main
 import (
 	"net/http"
-
-	"github.com/go-chi/chi/v5"
-	"github.com/go-chi/chi/v5/middleware"
 	bugfixes "github.com/bugfixes/go-bugfixes/middleware"
 	buglog "github.com/bugfixes/go-bugfixes/logs"
+  "github.com/go-chi/chi/v5"
+	"github.com/go-chi/chi/v5/middleware"
 )
 
 func main() {
@@ -40,7 +39,7 @@ func main() {
 
   r.Route("/", tester)
   if err := http.ListenAndServe(":8080", r); err != nil {
-  	return buglog.Errorf("failed to start listener: %w", err)
+  	return buglog.Errorf("failed to start listener: %v", err)
   }
 
   return nil

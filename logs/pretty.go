@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
+	"log"
 	"os"
 	"runtime/debug"
 	"strings"
@@ -17,26 +18,29 @@ func PrintPrettyStack(rvr interface{}) {
 	s := prettyStack{}
 	out, err := s.parse(debugStack, rvr)
 	if err == nil {
-		os.Stderr.Write(out)
+		if _, errs := os.Stderr.Write(out); errs != nil {
+			log.Fatal(errs)
+		}
 	} else {
 		// print stdlib output as a fallback
-		os.Stderr.Write(debugStack)
+		if _, errs := os.Stderr.Write(debugStack); errs != nil {
+			log.Fatal(errs)
+		}
 	}
 }
 
 func (s prettyStack) parse(debugStack []byte, rvr interface{}) ([]byte, error) {
 	var err error
-	useColor := true
 	buf := &bytes.Buffer{}
 
 	cW(buf, false, bRed, "\n")
-	cW(buf, useColor, bCyan, " panic: ")
-	cW(buf, useColor, bBlue, "%v", rvr)
+	cW(buf, true, bCyan, " panic: ")
+	cW(buf, true, bBlue, "%v", rvr)
 	cW(buf, false, bWhite, "\n \n")
 
 	// process debug stack info
 	stack := strings.Split(string(debugStack), "\n")
-	lines := []string{}
+	var lines []string
 
 	// locate panic line, as we may have nested panics
 	for i := len(stack) - 1; i > 0; i-- {
@@ -55,14 +59,16 @@ func (s prettyStack) parse(debugStack []byte, rvr interface{}) ([]byte, error) {
 
 	// decorate
 	for i, line := range lines {
-		lines[i], err = s.decorateLine(line, useColor, i)
+		lines[i], err = s.decorateLine(line, true, i)
 		if err != nil {
 			return nil, err
 		}
 	}
 
 	for _, l := range lines {
-		fmt.Fprintf(buf, "%s", l)
+		if _, errs := fmt.Fprintf(buf, "%s", l); errs != nil {
+			return nil, errs
+		}
 	}
 	return buf.Bytes(), nil
 }

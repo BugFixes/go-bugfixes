@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"log"
 	"net/http"
 	"os"
 	"runtime/debug"
@@ -42,7 +43,7 @@ func (k *contextKey) String() string {
 	return "chi/middleware context value " + k.name
 }
 
-func sendToBugfixes(rvr interface{}) {
+func SendToBugfixes(rvr interface{}) {
 	agentKey := os.Getenv("BUGFIXES_AGENT_KEY")
 	agentSecret := os.Getenv("BUGFIXES_AGENT_SECRET")
 	if agentKey == "" || agentSecret == "" {
@@ -58,8 +59,12 @@ func sendToBugfixes(rvr interface{}) {
 	out := &bytes.Buffer{}
 	bug, err := s.bugParse(debugStack, rvr)
 	if err != nil {
-		fmt.Fprintf(out, "bugfixes: failed to parse bug: %v", err)
-		os.Stderr.Write(out.Bytes())
+		if _, errs := fmt.Fprintf(out, "bugfixes: failed to parse bug: %v", err); errs != nil {
+			log.Fatal(errs)
+		}
+		if _, errs := os.Stderr.Write(out.Bytes()); errs != nil {
+			log.Fatal(errs)
+		}
 		return
 	}
 
@@ -71,8 +76,12 @@ func sendToBugfixes(rvr interface{}) {
 
 	body, err := json.Marshal(bug)
 	if err != nil {
-		fmt.Fprintf(out, "bugfixes: failed to marshall bug: %v", err)
-		os.Stderr.Write(out.Bytes())
+		if _, errs := fmt.Fprintf(out, "bugfixes: failed to marshall bug: %v", err); errs != nil {
+			log.Fatal(errs)
+		}
+		if _, errs := os.Stderr.Write(out.Bytes()); errs != nil {
+			log.Fatal(errs)
+		}
 		return
 	}
 	request, err := http.NewRequest("POST", bugServer, bytes.NewBuffer(body))
@@ -80,25 +89,37 @@ func sendToBugfixes(rvr interface{}) {
 	request.Header.Set("X-API-KEY", agentKey)
 	request.Header.Set("X-API-SECRET", agentSecret)
 	if err != nil {
-		fmt.Fprintf(out, "bugfixes: failed to new request: %v", err)
-		os.Stderr.Write(out.Bytes())
+		if _, errs := fmt.Fprintf(out, "bugfixes: failed to new request: %v", err); errs != nil {
+			log.Fatal(errs)
+		}
+		if _, err := os.Stderr.Write(out.Bytes()); err != nil {
+			log.Fatal(err)
+		}
 		return
 	}
 
 	resp, err := client.Do(request)
 	if err != nil {
-		fmt.Fprintf(out, "bugfixes: failed to send bug: %v", err)
-		os.Stderr.Write(out.Bytes())
+		if _, errs := fmt.Fprintf(out, "bugfixes: failed to send bug: %v", err); errs != nil {
+			log.Fatal(errs)
+		}
+		if _, errs := os.Stderr.Write(out.Bytes()); errs != nil {
+			log.Fatal(errs)
+		}
 		return
 	}
 	if err := resp.Body.Close(); err != nil {
-		fmt.Fprintf(out, "bugfixes: failed to close body: %v", err)
-		os.Stderr.Write(out.Bytes())
+		if _, errs := fmt.Fprintf(out, "bugfixes: failed to close body: %v", err); errs != nil {
+			log.Fatal(errs)
+		}
+		if _, errs := os.Stderr.Write(out.Bytes()); errs != nil {
+			log.Fatal(errs)
+		}
 		return
 	}
 }
 
-func parseBugLine(bugLine string) (string, string, int, error) {
+func ParseBugLine(bugLine string) (string, string, int, error) {
 	i := strings.Index(bugLine, ":")
 	j := strings.Index(bugLine, " ")
 	file := bugLine[:i]
