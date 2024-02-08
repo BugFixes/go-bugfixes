@@ -51,7 +51,7 @@ func RequestLogger(f LogFormatter) func(next http.Handler) http.Handler {
 
 			t1 := time.Now()
 			defer func() {
-				entry.Write(ww.Status(), ww.BytesWritten(), ww.Header(), time.Since(t1), nil)
+				entry.Write(ww.Status(), ww.BytesWritten(), time.Since(t1))
 			}()
 
 			next.ServeHTTP(ww, WithLogEntry(r, entry))
@@ -69,8 +69,8 @@ type LogFormatter interface {
 // LogEntry records the final log when a request completes.
 // See defaultLogEntry for an example implementation.
 type LogEntry interface {
-	Write(status, bytes int, header http.Header, elapsed time.Duration, extra interface{})
-	Panic(v interface{}, stack []byte)
+	Write(status, bytes int, elapsed time.Duration)
+	Panic(v interface{})
 }
 
 // GetLogEntry returns the in-context LogEntry for a request.
@@ -133,7 +133,7 @@ type defaultLogEntry struct {
 	useColor bool
 }
 
-func (l *defaultLogEntry) Write(status, bytes int, header http.Header, elapsed time.Duration, extra interface{}) {
+func (l *defaultLogEntry) Write(status, bytes int, elapsed time.Duration) {
 	switch {
 	case status < 200:
 		cW(l.buf, l.useColor, bBlue, "%03d", status)
@@ -161,7 +161,7 @@ func (l *defaultLogEntry) Write(status, bytes int, header http.Header, elapsed t
 	l.Logger.Print(l.buf.String())
 }
 
-func (l *defaultLogEntry) Panic(v interface{}, stack []byte) {
+func (l *defaultLogEntry) Panic(v interface{}) {
 	PrintPrettyStack(v)
 }
 

@@ -19,17 +19,6 @@ const (
 	defaultSkipDepth = 3
 )
 
-func (b BugFixes) Unwrap(e error) error {
-	u, ok := e.(interface {
-		Unwrap() error
-	})
-	if !ok {
-		return nil
-	}
-
-	return u.Unwrap()
-}
-
 type BugFixes struct {
 	FormattedLog string `json:"log"`
 	Level        string `json:"level"`
@@ -47,7 +36,7 @@ type BugFixes struct {
 	SkipDepthOverride int
 }
 
-func NewBugFixes(b BugFixes, err error) error {
+func NewBugFixes(err error) error {
 	if err == nil {
 		return nil
 	}
@@ -123,7 +112,18 @@ func ConvertLevelFromString(s string) int {
 	}
 }
 
-func (b *BugFixes) skipDepth(depth int) {
+func (b BugFixes) UnwrapIt(e error) error {
+	u, ok := e.(interface {
+		Unwrap() error
+	})
+	if !ok {
+		return nil
+	}
+
+	return u.Unwrap()
+}
+
+func (b BugFixes) skipDepth(depth int) {
 	_, file, line, _ := runtime.Caller(depth)
 	b.File = file
 	b.LineNumber = line
@@ -168,7 +168,7 @@ func (b BugFixes) DoReporting() {
 	b.sendLog()
 }
 
-func (b *BugFixes) logFormat() {
+func (b BugFixes) logFormat() {
 	out := bytes.Buffer{}
 	lf := logfmt.NewEncoder(&out)
 

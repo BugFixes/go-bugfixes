@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
+	"log"
 	"net/http"
 	"os"
 	"runtime/debug"
@@ -11,7 +12,7 @@ import (
 )
 
 // Recoverer is a middleware that recovers from panics, logs the panic (and a
-// backtrace), and returns a HTTP 500 (Internal Server Error) status if
+// backtrace), and returns an HTTP 500 (Internal Server Error) status if
 // possible. Recoverer prints a request ID if one is provided.
 //
 // Alternatively, look at https://github.com/pressly/lg middleware pkgs.
@@ -22,14 +23,14 @@ func Recoverer(next http.Handler) http.Handler {
 
 				logEntry := GetLogEntry(r)
 				if logEntry != nil {
-					logEntry.Panic(rvr, debug.Stack())
+					logEntry.Panic(rvr)
 				} else {
 					PrintPrettyStack(rvr)
 				}
 
 				w.WriteHeader(http.StatusInternalServerError)
 
-				go sendToBugfixes(rvr)
+				go SendToBugfixes(rvr)
 			}
 		}()
 
@@ -44,10 +45,14 @@ func PrintPrettyStack(rvr interface{}) {
 	s := prettyStack{}
 	out, err := s.parse(debugStack, rvr)
 	if err == nil {
-		os.Stderr.Write(out)
+		if _, errs := os.Stderr.Write(out); errs != nil {
+			log.Fatal(errs)
+		}
 	} else {
 		// print stdlib output as a fallback
-		os.Stderr.Write(debugStack)
+		if _, errs := os.Stderr.Write(debugStack); errs != nil {
+			log.Fatal(errs)
+		}
 	}
 }
 
@@ -56,17 +61,17 @@ type prettyStack struct {
 
 func (s prettyStack) parse(debugStack []byte, rvr interface{}) ([]byte, error) {
 	var err error
-	useColor := true
+
 	buf := &bytes.Buffer{}
 
 	cW(buf, false, bRed, "\n")
-	cW(buf, useColor, bCyan, " panic: ")
-	cW(buf, useColor, bBlue, "%v", rvr)
+	cW(buf, true, bCyan, " panic: ")
+	cW(buf, true, bBlue, "%v", rvr)
 	cW(buf, false, bWhite, "\n \n")
 
 	// process debug stack info
 	stack := strings.Split(string(debugStack), "\n")
-	lines := []string{}
+	var lines []string
 
 	// locate panic line, as we may have nested panics
 	for i := len(stack) - 1; i > 0; i-- {
@@ -85,14 +90,16 @@ func (s prettyStack) parse(debugStack []byte, rvr interface{}) ([]byte, error) {
 
 	// decorate
 	for i, line := range lines {
-		lines[i], err = s.decorateLine(line, useColor, i)
+		lines[i], err = s.decorateLine(line, true, i)
 		if err != nil {
 			return nil, err
 		}
 	}
 
 	for _, l := range lines {
-		fmt.Fprintf(buf, "%s", l)
+		if _, errs := fmt.Fprintf(buf, "%s", l); errs != nil {
+			return nil, errs
+		}
 	}
 	return buf.Bytes(), nil
 }
@@ -101,17 +108,16 @@ func (s prettyStack) bugParse(debugStack []byte, rvr interface{}) (BugFixesSend,
 	bug := BugFixesSend{}
 
 	var err error
-	useColor := true
 	buf := &bytes.Buffer{}
 
 	cW(buf, false, bRed, "\n")
-	cW(buf, useColor, bCyan, " panic: ")
-	cW(buf, useColor, bBlue, "%v", rvr)
+	cW(buf, true, bCyan, " panic: ")
+	cW(buf, true, bBlue, "%v", rvr)
 	cW(buf, false, bWhite, "\n \n")
 
 	// process debug stack info
 	stack := strings.Split(string(debugStack), "\n")
-	lines := []string{}
+	var lines []string
 
 	bug.Level = "unknown"
 	// locate panic line, as we may have nested panics
@@ -134,7 +140,7 @@ func (s prettyStack) bugParse(debugStack []byte, rvr interface{}) (BugFixesSend,
 	i := strings.Index(bugLine, " ")
 	bug.BugLine = bugLine[:i]
 
-	file, line, lineNumber, err := parseBugLine(lines[1])
+	file, line, lineNumber, err := ParseBugLine(lines[1])
 	if err != nil {
 		return bug, fmt.Errorf("failed to parse bug line: %w", err)
 	}
@@ -143,7 +149,7 @@ func (s prettyStack) bugParse(debugStack []byte, rvr interface{}) (BugFixesSend,
 
 	// decorate
 	for i, line := range lines {
-		lines[i], err = s.decorateLine(line, useColor, i)
+		lines[i], err = s.decorateLine(line, true, i)
 		if err != nil {
 			return bug, err
 		}
