@@ -156,3 +156,19 @@ func (b BugFixes) Fatal(inputs ...interface{}) {
 	b.DoReporting()
 	panic(b)
 }
+func (b BugFixes) Fatalf(format string, inputs ...interface{}) {
+	b.Level = "fatal"
+	b.FormattedLog = fmt.Sprintf(format, inputs...)
+	b.DoReporting()
+	panic(b)
+}
+func Fatal(inputs ...interface{}) {
+	format := strings.Repeat("%v, ", len(inputs))
+	format = strings.TrimRight(format, ", ")
+	Fatalf(format, inputs...)
+}
+func Fatalf(format string, inputs ...interface{}) {
+	BugFixes{
+		LocalOnly: false,
+	}.Fatalf(format, inputs...)
+}
