@@ -32,12 +32,22 @@ func (s *System) getAllowedMethods() string {
 	return strings.Join(s.AllowedMethods, ", ")
 }
 
+func (s *System) wildcardEnabled() bool {
+  for _, origin := range s.AllowedOrigins {
+    if origin == "*" {
+      return true
+    }
+  }
+
+  return false
+}
+
 
 func (s *System) CORS(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		originalOrigin := r.Header.Get("Origin")
 
-		isAllowed := false
+		isAllowed := s.wildcardEnabled()
 		for _, origin := range s.AllowedOrigins {
 			if origin == originalOrigin {
 				isAllowed = true
