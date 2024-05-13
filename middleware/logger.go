@@ -187,7 +187,11 @@ func (l *defaultLogEntry) Write(status, bytes int, elapsed time.Duration) {
 		cW(l.buf, l.useColor, nRed, "%s", elapsed)
 	}
 
-  if l.LogLevel >= Info {
+  if status == 200 {
+    if l.LogLevel <= Error {
+      l.Logger.Print(l.buf.String())
+    }
+  } else {
     l.Logger.Print(l.buf.String())
   }
 }
