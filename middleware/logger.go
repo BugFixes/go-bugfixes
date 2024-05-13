@@ -20,6 +20,24 @@ var (
 	DefaultLogger func(next http.Handler) http.Handler
 )
 
+type Level int
+const (
+  Log Level = iota
+  Info
+  Error
+  Fatal
+)
+
+type LoggerSystem struct {
+  LogLevel Level
+}
+
+func SetupLogger(logLevel Level) *LoggerSystem {
+  return &LoggerSystem{
+    LogLevel: logLevel,
+  }
+}
+
 // Logger is a middleware that logs the start and end of each request, along
 // with some useful data about what was requested, what the response status was,
 // and how long it took to return. When standard output is a TTY, Logger will
@@ -40,6 +58,16 @@ var (
 // ```
 func Logger(next http.Handler) http.Handler {
 	return DefaultLogger(next)
+}
+
+func (s *LoggerSystem) Logger(next http.Handler) http.Handler {
+  l := RequestLogger(&DefaultLogFormatter{
+    Logger: log.New(os.Stdout, "", log.LstdFlags),
+    NoColor: false,
+    LogLevel: s.LogLevel,
+  })
+
+  return l(next)
 }
 
 // RequestLogger returns a logger handler using a custom LogFormatter.
@@ -63,7 +91,7 @@ func RequestLogger(f LogFormatter) func(next http.Handler) http.Handler {
 // LogFormatter initiates the beginning of a new LogEntry per request.
 // See DefaultLogFormatter for an example implementation.
 type LogFormatter interface {
-	NewLogEntry(r *http.Request) LogEntry
+  NewLogEntry(r *http.Request) LogEntry
 }
 
 // LogEntry records the final log when a request completes.
@@ -94,6 +122,7 @@ type LoggerInterface interface {
 type DefaultLogFormatter struct {
 	Logger  LoggerInterface
 	NoColor bool
+  LogLevel Level
 }
 
 // NewLogEntry creates a new LogEntry for the request.
@@ -158,7 +187,9 @@ func (l *defaultLogEntry) Write(status, bytes int, elapsed time.Duration) {
 		cW(l.buf, l.useColor, nRed, "%s", elapsed)
 	}
 
-	l.Logger.Print(l.buf.String())
+  if l.LogLevel >= Info {
+    l.Logger.Print(l.buf.String())
+  }
 }
 
 func (l *defaultLogEntry) Panic(v interface{}) {
