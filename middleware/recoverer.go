@@ -19,7 +19,8 @@ import (
 func Recoverer(next http.Handler) http.Handler {
 	fn := func(w http.ResponseWriter, r *http.Request) {
 		defer func() {
-			if rvr := recover(); rvr != nil && rvr != http.ErrAbortHandler {
+      rvr := recover()
+			if rvr != nil && rvr != http.ErrAbortHandler {
 
 				logEntry := GetLogEntry(r)
 				if logEntry != nil {
