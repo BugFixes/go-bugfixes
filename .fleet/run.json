@@ -1,0 +1,17 @@
+{
+  "configurations": [
+    {
+      "type": "go-test",
+      "name": "Go-test configuration",
+      "goExecPath": "/bin/go",
+      "workingDir": "$PROJECT_DIR$",
+      "buildParams": [
+        "-v",
+        "-race",
+        "-bench=./...",
+        "-benchmem",
+        "-timeout=120s",
+      ],
+    },
+  ]
+}
