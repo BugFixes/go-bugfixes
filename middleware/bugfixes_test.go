@@ -9,13 +9,13 @@ import (
 	"testing"
 )
 
-func TestNew(t *testing.T) {
+func TestBugfixes(t *testing.T) {
 	handlerFunc := http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
 		if _, errs := fmt.Fprint(w, "This is a test."); errs != nil {
 			t.Fatalf("Could not write to response writer: %v", errs)
 		}
 	})
-	handler := middleware.New(handlerFunc)
+	handler := middleware.BugFixes(handlerFunc)
 	testHandler := handler(handlerFunc)
 	server := httptest.NewServer(handler(testHandler))
 	resp, err := http.Get(server.URL)

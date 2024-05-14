@@ -22,7 +22,7 @@ func TestBugFixes(t *testing.T) {
 	}
 
 	// Apply middleware to the handler
-	middlewareHandler := middleware.BugFixes(handler)
+	middlewareHandler := middleware.DefaultMiddlware(handler)
 
 	// Create a ResponseRecorder (which satisfies http.ResponseWriter) to record the response
 	rr := httptest.NewRecorder()

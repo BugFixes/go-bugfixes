@@ -23,8 +23,8 @@ type BugFixesSend struct {
 	Level      string      `json:"level"`
 }
 
-// New will create a new middleware handler from a http.Handler.
-func New(h http.Handler) func(next http.Handler) http.Handler {
+// BugFixes will create a new middleware handler from a http.Handler.
+func BugFixes(h http.Handler) func(next http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			h.ServeHTTP(w, r)

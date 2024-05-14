@@ -57,9 +57,3 @@ func DefaultMiddlware(next http.Handler) http.Handler {
 	return s.Handler(next)
 }
 
-func BugFixes(next http.Handler) http.Handler {
-	handler := Logger(next)
-	handler = RequestID(handler)
-	return Recoverer(handler)
-}
-
