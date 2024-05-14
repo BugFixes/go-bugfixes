@@ -8,6 +8,10 @@ import (
 type System struct {
 	Context context.Context
 
+  // Bugfixes
+  AgentID string
+  Secret string
+
 	// Middlewares to use
 	Middlewares []func(handler http.Handler) http.Handler
 
@@ -21,6 +25,11 @@ func NewMiddleware(ctx context.Context) *System {
 	return &System{
 		Context: ctx,
 	}
+}
+
+func (s *System) SetupBugfixes(id, secret string) {
+  s.AgentID = id
+  s.Secret = secret
 }
 
 func (s *System) AddMiddleware(middlwares ...func(handler http.Handler) http.Handler) {

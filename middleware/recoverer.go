@@ -17,28 +17,31 @@ import (
 //
 // Alternatively, look at https://github.com/pressly/lg middleware pkgs.
 func Recoverer(next http.Handler) http.Handler {
-	fn := func(w http.ResponseWriter, r *http.Request) {
-		defer func() {
+	s := &System{}
+  return s.Recoverer(next)
+}
+
+func (s *System) Recoverer(next http.Handler) http.Handler {
+  return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+    defer func() {
       rvr := recover()
-			if rvr != nil && rvr != http.ErrAbortHandler {
+      if rvr != nil && rvr != http.ErrAbortHandler {
 
-				logEntry := GetLogEntry(r)
-				if logEntry != nil {
-					logEntry.Panic(rvr)
-				} else {
-					PrintPrettyStack(rvr)
-				}
+        logEntry := GetLogEntry(r)
+        if logEntry != nil {
+          logEntry.Panic(rvr)
+        } else {
+          PrintPrettyStack(rvr)
+        }
 
-				w.WriteHeader(http.StatusInternalServerError)
+        w.WriteHeader(http.StatusInternalServerError)
 
-				go SendToBugfixes(rvr)
-			}
-		}()
+        go s.SendToBugfixes(rvr)
+      }
+    }()
 
-		next.ServeHTTP(w, r)
-	}
-
-	return http.HandlerFunc(fn)
+    next.ServeHTTP(w, r)
+  })
 }
 
 func PrintPrettyStack(rvr interface{}) {
