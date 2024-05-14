@@ -227,7 +227,7 @@ func (b *BugFixes) sendLog() {
 		fmt.Printf("bugfixes sendLog marshal: %+v\n", err)
 		return
 	}
-  a := fmt.Sprintf("%+v", b) // debugging purposes
+  a := fmt.Sprintf("%+v", body) // debugging purposes
   _ = fmt.Sprint(a)
 
 	request, err := http.NewRequest("POST", bugServer, bytes.NewBuffer(body))
