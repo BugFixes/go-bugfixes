@@ -205,7 +205,7 @@ func (b *BugFixes) logFormat() {
 }
 
 func (b *BugFixes) sendLog() {
-	bugServer := "https://api.bugfix.es"
+	bugServer := "https://api.bugfix.es/v1"
 	if bugServerEnv := os.Getenv("BUGFIXES_SERVER"); bugServerEnv != "" {
 		bugServer = bugServerEnv
 	}
@@ -223,6 +223,7 @@ func (b *BugFixes) sendLog() {
 	}
 
 	body, err := json.Marshal(b)
+  _ = fmt.Sprintf("%+v", b) // debugging purposes
 	if err != nil {
 		fmt.Printf("bugfixes sendLog marshal: %+v\n", err)
 		return
