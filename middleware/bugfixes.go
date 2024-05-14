@@ -10,7 +10,6 @@ import (
 	"runtime/debug"
 	"strconv"
 	"strings"
-	"time"
 )
 
 type BugFixesSend struct {
@@ -43,25 +42,21 @@ func (k *contextKey) String() string {
 	return "chi/middleware context value " + k.name
 }
 
-func SendToBugfixes(rvr interface{}) {
-  agentKey := os.Getenv("BUGFIXES_AGENT_KEY")
-  agentSecret := os.Getenv("BUGFIXES_AGENT_SECRET")
-  if agentKey == "" || agentSecret == "" {
-    return
-  }
-
-  s := &System{
-    AgentID: agentKey,
-    Secret: agentSecret,
-  }
-  s.SendToBugfixes(rvr)
-}
-
-func (s *System) SendToBugfixes(rvr interface{}) {
-  client := http.Client{
-		Timeout: 5 * time.Second,
+func SendToBugfixes(rvr interface{}, client http.Client) {
+	agentKey := os.Getenv("BUGFIXES_AGENT_KEY")
+	agentSecret := os.Getenv("BUGFIXES_AGENT_SECRET")
+	if agentKey == "" || agentSecret == "" {
+		return
 	}
 
+	s := &System{
+		AgentID: agentKey,
+		Secret:  agentSecret,
+	}
+	s.SendToBugfixes(rvr, client)
+}
+
+func (s *System) SendToBugfixes(rvr interface{}, client http.Client) {
 	debugStack := debug.Stack()
 	p := prettyStack{}
 	out := &bytes.Buffer{}
@@ -76,7 +71,7 @@ func (s *System) SendToBugfixes(rvr interface{}) {
 		return
 	}
 
-	bugServer := "https://api.bugfix.es"
+	bugServer := "https://api.bugfix.es/v1"
 	if bugServerEnv := os.Getenv("BUGFIXES_SERVER"); bugServerEnv != "" {
 		bugServer = bugServerEnv
 	}

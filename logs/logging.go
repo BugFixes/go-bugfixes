@@ -35,9 +35,9 @@ type BugFixes struct {
 	Err               error
 	SkipDepthOverride int
 
-  // Creds
-  AgentID string
-  Secret string
+	// Creds
+	AgentID string
+	Secret  string
 }
 
 func NewBugFixes(err error) error {
@@ -50,9 +50,9 @@ func NewBugFixes(err error) error {
 	}
 }
 
-func (b BugFixes) Setup(id, secret string) {
-  b.AgentID = id
-  b.Secret = secret
+func (b *BugFixes) Setup(id, secret string) {
+	b.AgentID = id
+	b.Secret = secret
 }
 
 const (
@@ -121,7 +121,7 @@ func ConvertLevelFromString(s string) int {
 	}
 }
 
-func (b BugFixes) UnwrapIt(e error) error {
+func (b *BugFixes) UnwrapIt(e error) error {
 	u, ok := e.(interface {
 		Unwrap() error
 	})
@@ -132,14 +132,14 @@ func (b BugFixes) UnwrapIt(e error) error {
 	return u.Unwrap()
 }
 
-func (b BugFixes) skipDepth(depth int) {
+func (b *BugFixes) skipDepth(depth int) {
 	_, file, line, _ := runtime.Caller(depth)
 	b.File = file
 	b.LineNumber = line
 	b.Line = strconv.Itoa(line)
 }
 
-func (b BugFixes) DoReporting() {
+func (b *BugFixes) DoReporting() {
 	b.skipDepth(defaultSkipDepth)
 	if b.SkipDepthOverride != 0 {
 		b.skipDepth(b.SkipDepthOverride)
@@ -177,7 +177,7 @@ func (b BugFixes) DoReporting() {
 	b.sendLog()
 }
 
-func (b BugFixes) logFormat() {
+func (b *BugFixes) logFormat() {
 	out := bytes.Buffer{}
 	lf := logfmt.NewEncoder(&out)
 
@@ -204,7 +204,7 @@ func (b BugFixes) logFormat() {
 	b.LogFmt = out.String()
 }
 
-func (b BugFixes) sendLog() {
+func (b *BugFixes) sendLog() {
 	bugServer := "https://api.bugfix.es"
 	if bugServerEnv := os.Getenv("BUGFIXES_SERVER"); bugServerEnv != "" {
 		bugServer = bugServerEnv
@@ -253,7 +253,7 @@ func (b BugFixes) sendLog() {
 	}
 }
 
-func (b BugFixes) makePretty() {
+func (b *BugFixes) makePretty() {
 	out := &bytes.Buffer{}
 	log := b.FormattedLog
 
