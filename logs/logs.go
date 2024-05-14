@@ -38,8 +38,11 @@ func (b BugFixes) Errorf(format string, inputs ...interface{}) error {
 	b.Level = "error"
 	b.FormattedLog = fmt.Sprintf(format, inputs...)
 	b.FormattedError = fmt.Errorf(format, inputs...)
-	b.Stack = debug.Stack()
-	b.DoReporting()
+
+  if !b.LocalOnly {
+    b.Stack = debug.Stack()
+    b.DoReporting()
+  }
 
 	return fmt.Errorf(format, inputs...)
 }
@@ -65,8 +68,11 @@ func Infof(format string, inputs ...interface{}) string {
 func (b BugFixes) Infof(format string, inputs ...interface{}) string {
 	b.Level = "info"
 	b.FormattedLog = fmt.Sprintf(format, inputs...)
-	b.Stack = debug.Stack()
-	b.DoReporting()
+
+  if !b.LocalOnly {
+    b.Stack = debug.Stack()
+    b.DoReporting()
+  }
 
 	return fmt.Sprintf("Info: %s", fmt.Sprintf(format, inputs...))
 }
@@ -92,8 +98,11 @@ func Debugf(format string, inputs ...interface{}) string {
 func (b BugFixes) Debugf(format string, inputs ...interface{}) string {
 	b.Level = "debug"
 	b.FormattedLog = fmt.Sprintf(format, inputs...)
-	b.Stack = debug.Stack()
-	b.DoReporting()
+
+  if !b.LocalOnly {
+    b.Stack = debug.Stack()
+    b.DoReporting()
+  }
 
 	return fmt.Sprintf("Debug: %s", fmt.Sprintf(format, inputs...))
 }
@@ -119,8 +128,11 @@ func Logf(format string, inputs ...interface{}) string {
 func (b BugFixes) Logf(format string, inputs ...interface{}) string {
 	b.Level = "log"
 	b.FormattedLog = fmt.Sprintf(format, inputs...)
-	b.Stack = debug.Stack()
-	b.DoReporting()
+
+  if !b.LocalOnly {
+    b.Stack = debug.Stack()
+    b.DoReporting()
+  }
 
 	return fmt.Sprintf("Log: %s", fmt.Sprintf(format, inputs...))
 }
@@ -146,8 +158,11 @@ func Warnf(format string, inputs ...interface{}) string {
 func (b BugFixes) Warnf(format string, inputs ...interface{}) string {
 	b.Level = "warn"
 	b.FormattedLog = fmt.Sprintf(format, inputs...)
-	b.Stack = debug.Stack()
-	b.DoReporting()
+
+  if !b.LocalOnly {
+    b.Stack = debug.Stack()
+    b.DoReporting()
+  }
 
 	return fmt.Sprintf("Warn: %s", fmt.Sprintf(format, inputs...))
 }
@@ -172,7 +187,11 @@ func Fatalf(format string, inputs ...interface{}) {
 func (b BugFixes) Fatalf(format string, inputs ...interface{}) {
 	b.Level = "fatal"
 	b.FormattedLog = fmt.Sprintf(format, inputs...)
-	b.Stack = debug.Stack()
-	b.DoReporting()
+  b.Stack = debug.Stack()
+
+  if !b.LocalOnly {
+    b.DoReporting()
+  }
+
 	panic(b)
 }
