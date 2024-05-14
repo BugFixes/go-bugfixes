@@ -9,6 +9,7 @@ import (
 	"os"
 	"runtime/debug"
 	"strings"
+	"time"
 )
 
 // Recoverer is a middleware that recovers from panics, logs the panic (and a
@@ -18,30 +19,32 @@ import (
 // Alternatively, look at https://github.com/pressly/lg middleware pkgs.
 func Recoverer(next http.Handler) http.Handler {
 	s := &System{}
-  return s.Recoverer(next)
+	return s.Recoverer(next)
 }
 
 func (s *System) Recoverer(next http.Handler) http.Handler {
-  return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-    defer func() {
-      rvr := recover()
-      if rvr != nil && rvr != http.ErrAbortHandler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		defer func() {
+			rvr := recover()
+			if rvr != nil && rvr != http.ErrAbortHandler {
 
-        logEntry := GetLogEntry(r)
-        if logEntry != nil {
-          logEntry.Panic(rvr)
-        } else {
-          PrintPrettyStack(rvr)
-        }
+				logEntry := GetLogEntry(r)
+				if logEntry != nil {
+					logEntry.Panic(rvr)
+				} else {
+					PrintPrettyStack(rvr)
+				}
 
-        w.WriteHeader(http.StatusInternalServerError)
+				w.WriteHeader(http.StatusInternalServerError)
 
-        go s.SendToBugfixes(rvr)
-      }
-    }()
+				go s.SendToBugfixes(rvr, http.Client{
+					Timeout: time.Second * 10,
+				})
+			}
+		}()
 
-    next.ServeHTTP(w, r)
-  })
+		next.ServeHTTP(w, r)
+	})
 }
 
 func PrintPrettyStack(rvr interface{}) {
