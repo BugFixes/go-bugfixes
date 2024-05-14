@@ -44,20 +44,28 @@ func (k *contextKey) String() string {
 }
 
 func SendToBugfixes(rvr interface{}) {
-	agentKey := os.Getenv("BUGFIXES_AGENT_KEY")
-	agentSecret := os.Getenv("BUGFIXES_AGENT_SECRET")
-	if agentKey == "" || agentSecret == "" {
-		return
-	}
+  agentKey := os.Getenv("BUGFIXES_AGENT_KEY")
+  agentSecret := os.Getenv("BUGFIXES_AGENT_SECRET")
+  if agentKey == "" || agentSecret == "" {
+    return
+  }
 
-	client := http.Client{
+  s := &System{
+    AgentID: agentKey,
+    Secret: agentSecret,
+  }
+  s.SendToBugfixes(rvr)
+}
+
+func (s *System) SendToBugfixes(rvr interface{}) {
+  client := http.Client{
 		Timeout: 5 * time.Second,
 	}
 
 	debugStack := debug.Stack()
-	s := prettyStack{}
+	p := prettyStack{}
 	out := &bytes.Buffer{}
-	bug, err := s.bugParse(debugStack, rvr)
+	bug, err := p.bugParse(debugStack, rvr)
 	if err != nil {
 		if _, errs := fmt.Fprintf(out, "bugfixes: failed to parse bug: %v", err); errs != nil {
 			log.Fatal(errs)
@@ -86,8 +94,8 @@ func SendToBugfixes(rvr interface{}) {
 	}
 	request, err := http.NewRequest("POST", bugServer, bytes.NewBuffer(body))
 	request.Header.Set("Content-Type", "application/json")
-	request.Header.Set("X-API-KEY", agentKey)
-	request.Header.Set("X-API-SECRET", agentSecret)
+	request.Header.Set("X-API-KEY", s.AgentID)
+	request.Header.Set("X-API-SECRET", s.Secret)
 	if err != nil {
 		if _, errs := fmt.Fprintf(out, "bugfixes: failed to new request: %v", err); errs != nil {
 			log.Fatal(errs)
