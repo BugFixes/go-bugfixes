@@ -34,6 +34,10 @@ type BugFixes struct {
 	Bug               string
 	Err               error
 	SkipDepthOverride int
+
+  // Creds
+  AgentID string
+  Secret string
 }
 
 func NewBugFixes(err error) error {
@@ -44,6 +48,11 @@ func NewBugFixes(err error) error {
 	return &BugFixes{
 		Err: err,
 	}
+}
+
+func (b BugFixes) Setup(id, secret string) {
+  b.AgentID = id
+  b.Secret = secret
 }
 
 const (
@@ -196,21 +205,18 @@ func (b BugFixes) logFormat() {
 }
 
 func (b BugFixes) sendLog() {
-	agentKey := os.Getenv("BUGFIXES_AGENT_KEY")
-	agentSecret := os.Getenv("BUGFIXES_AGENT_SECRET")
-
 	bugServer := "https://api.bugfix.es"
 	if bugServerEnv := os.Getenv("BUGFIXES_SERVER"); bugServerEnv != "" {
 		bugServer = bugServerEnv
 	}
 	bugServer = fmt.Sprintf("%s/log", bugServer)
 
-	if agentKey == "" || agentSecret == "" {
+	if b.AgentID == "" || b.Secret == "" {
 		fmt.Printf("cant send to server till you have created an agent and set the keys\n")
-		if agentKey == "" {
+		if b.AgentID == "" {
 			fmt.Printf("env: BUGFIXES_AGENT_KEY missing\n")
 		}
-		if agentSecret == "" {
+		if b.Secret == "" {
 			fmt.Printf("env: BUGFIXES_AGENT_SECRET missing\n")
 		}
 		return
@@ -228,8 +234,8 @@ func (b BugFixes) sendLog() {
 		return
 	}
 	request.Header.Set("Content-Type", "application/json")
-	request.Header.Set("X-API-KEY", agentKey)
-	request.Header.Set("X-API-SECRET", agentSecret)
+	request.Header.Set("X-API-KEY", b.AgentID)
+	request.Header.Set("X-API-SECRET", b.Secret)
 
 	client := http.Client{
 		Timeout: 5 * time.Second,
