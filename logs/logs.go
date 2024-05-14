@@ -25,20 +25,20 @@ func (b BugFixes) Error() string {
 }
 
 func Error(inputs ...interface{}) error {
-	format := strings.Repeat("%w, ", len(inputs))
+	format := strings.Repeat("%v, ", len(inputs))
 	format = strings.TrimRight(format, ", ") // remove trailing comma and space
 	return Errorf(format, inputs...)
 }
 func Errorf(format string, inputs ...interface{}) error {
-  return BugFixes{
-    LocalOnly: false,
-  }.Errorf(format, inputs...)
+	return BugFixes{
+		LocalOnly: false,
+	}.Errorf(format, inputs...)
 }
 func (b BugFixes) Errorf(format string, inputs ...interface{}) error {
 	b.Level = "error"
 	b.FormattedLog = fmt.Sprintf(format, inputs...)
 	b.FormattedError = fmt.Errorf(format, inputs...)
-  b.Stack = debug.Stack()
+	b.Stack = debug.Stack()
 	b.DoReporting()
 
 	return fmt.Errorf(format, inputs...)
@@ -58,14 +58,14 @@ func (b BugFixes) Info(inputs ...interface{}) string {
 	return b.Infof(format, inputs...)
 }
 func Infof(format string, inputs ...interface{}) string {
-  return BugFixes{
-    LocalOnly: false,
-  }.Infof(format, inputs...)
+	return BugFixes{
+		LocalOnly: false,
+	}.Infof(format, inputs...)
 }
 func (b BugFixes) Infof(format string, inputs ...interface{}) string {
 	b.Level = "info"
 	b.FormattedLog = fmt.Sprintf(format, inputs...)
-  b.Stack = debug.Stack()
+	b.Stack = debug.Stack()
 	b.DoReporting()
 
 	return fmt.Sprintf("Info: %s", fmt.Sprintf(format, inputs...))
@@ -80,9 +80,9 @@ func Debug(inputs ...interface{}) string {
 	return Debugf(format, inputs...)
 }
 func (b BugFixes) Debug(inputs ...interface{}) string {
-  format := strings.Repeat("%v, ", len(inputs))
-  format = strings.TrimRight(format, ", ") // remove trailing comma and space
-  return b.Debugf(format, inputs...)
+	format := strings.Repeat("%v, ", len(inputs))
+	format = strings.TrimRight(format, ", ") // remove trailing comma and space
+	return b.Debugf(format, inputs...)
 }
 func Debugf(format string, inputs ...interface{}) string {
 	return BugFixes{
@@ -90,12 +90,12 @@ func Debugf(format string, inputs ...interface{}) string {
 	}.Debugf(format, inputs...)
 }
 func (b BugFixes) Debugf(format string, inputs ...interface{}) string {
-  b.Level = "debug"
-  b.FormattedLog = fmt.Sprintf(format, inputs...)
-  b.Stack = debug.Stack()
-  b.DoReporting()
+	b.Level = "debug"
+	b.FormattedLog = fmt.Sprintf(format, inputs...)
+	b.Stack = debug.Stack()
+	b.DoReporting()
 
-  return fmt.Sprintf("Debug: %s", fmt.Sprintf(format, inputs...))
+	return fmt.Sprintf("Debug: %s", fmt.Sprintf(format, inputs...))
 }
 
 // </editor-fold>
@@ -107,9 +107,9 @@ func Log(inputs ...interface{}) string {
 	return Logf(format, inputs...)
 }
 func (b BugFixes) Log(inputs ...interface{}) string {
-  format := strings.Repeat("%v, ", len(inputs))
-  format = strings.TrimRight(format, ", ") // remove trailing comma and space
-  return b.Logf(format, inputs...)
+	format := strings.Repeat("%v, ", len(inputs))
+	format = strings.TrimRight(format, ", ") // remove trailing comma and space
+	return b.Logf(format, inputs...)
 }
 func Logf(format string, inputs ...interface{}) string {
 	return BugFixes{
@@ -117,12 +117,12 @@ func Logf(format string, inputs ...interface{}) string {
 	}.Logf(format, inputs...)
 }
 func (b BugFixes) Logf(format string, inputs ...interface{}) string {
-  b.Level = "log"
-  b.FormattedLog = fmt.Sprintf(format, inputs...)
-  b.Stack = debug.Stack()
-  b.DoReporting()
+	b.Level = "log"
+	b.FormattedLog = fmt.Sprintf(format, inputs...)
+	b.Stack = debug.Stack()
+	b.DoReporting()
 
-  return fmt.Sprintf("Log: %s", fmt.Sprintf(format, inputs...))
+	return fmt.Sprintf("Log: %s", fmt.Sprintf(format, inputs...))
 }
 
 // </editor-fold>
@@ -134,9 +134,9 @@ func Warn(inputs ...interface{}) string {
 	return Warnf(format, inputs...)
 }
 func (b BugFixes) Warn(inputs ...interface{}) string {
-  format := strings.Repeat("%v, ", len(inputs))
-  format = strings.TrimRight(format, ", ") // remove trailing comma and space
-  return b.Warnf(format, inputs...)
+	format := strings.Repeat("%v, ", len(inputs))
+	format = strings.TrimRight(format, ", ") // remove trailing comma and space
+	return b.Warnf(format, inputs...)
 }
 func Warnf(format string, inputs ...interface{}) string {
 	return BugFixes{
@@ -144,12 +144,12 @@ func Warnf(format string, inputs ...interface{}) string {
 	}.Warnf(format, inputs...)
 }
 func (b BugFixes) Warnf(format string, inputs ...interface{}) string {
-  b.Level = "warn"
-  b.FormattedLog = fmt.Sprintf(format, inputs...)
-  b.Stack = debug.Stack()
-  b.DoReporting()
+	b.Level = "warn"
+	b.FormattedLog = fmt.Sprintf(format, inputs...)
+	b.Stack = debug.Stack()
+	b.DoReporting()
 
-  return fmt.Sprintf("Warn: %s", fmt.Sprintf(format, inputs...))
+	return fmt.Sprintf("Warn: %s", fmt.Sprintf(format, inputs...))
 }
 
 // </editor-fold>
@@ -160,9 +160,9 @@ func Fatal(inputs ...interface{}) {
 	Fatalf(format, inputs...)
 }
 func (b BugFixes) Fatal(inputs ...interface{}) {
-  format := strings.Repeat("%v ", len(inputs))
-  format = strings.TrimRight(format, ", ")
-  b.Fatalf(format, inputs...)
+	format := strings.Repeat("%v ", len(inputs))
+	format = strings.TrimRight(format, ", ")
+	b.Fatalf(format, inputs...)
 }
 func Fatalf(format string, inputs ...interface{}) {
 	BugFixes{
@@ -170,9 +170,9 @@ func Fatalf(format string, inputs ...interface{}) {
 	}.Fatalf(format, inputs...)
 }
 func (b BugFixes) Fatalf(format string, inputs ...interface{}) {
-  b.Level = "fatal"
-  b.FormattedLog = fmt.Sprintf(format, inputs...)
-  b.Stack = debug.Stack()
-  b.DoReporting()
-  panic(b)
+	b.Level = "fatal"
+	b.FormattedLog = fmt.Sprintf(format, inputs...)
+	b.Stack = debug.Stack()
+	b.DoReporting()
+	panic(b)
 }
