@@ -47,7 +47,7 @@ func Test_Error(t *testing.T) {
 		{
 			name:   "simple",
 			inputs: errors.New("simple"),
-			expect: fmt.Errorf("%w", errors.New("simple")),
+			expect: fmt.Errorf("%v", errors.New("simple")),
 		},
 	}
 
