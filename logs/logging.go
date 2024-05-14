@@ -223,11 +223,12 @@ func (b *BugFixes) sendLog() {
 	}
 
 	body, err := json.Marshal(b)
-  _ = fmt.Sprintf("%+v", b) // debugging purposes
 	if err != nil {
 		fmt.Printf("bugfixes sendLog marshal: %+v\n", err)
 		return
 	}
+  a := fmt.Sprintf("%+v", b) // debugging purposes
+  _ = fmt.Sprint(a)
 
 	request, err := http.NewRequest("POST", bugServer, bytes.NewBuffer(body))
 	if err != nil {
