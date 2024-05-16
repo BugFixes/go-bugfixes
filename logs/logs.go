@@ -72,7 +72,6 @@ func (b *BugFixes) Infof(format string, inputs ...interface{}) string {
 	b.FormattedLog = fmt.Sprintf(format, inputs...)
 
 	if !b.LocalOnly {
-		b.Stack = debug.Stack()
 		b.DoReporting()
 	}
 
@@ -135,7 +134,6 @@ func (b *BugFixes) Logf(format string, inputs ...interface{}) string {
 	b.FormattedLog = fmt.Sprintf(format, inputs...)
 
 	if !b.LocalOnly {
-		b.Stack = debug.Stack()
 		b.DoReporting()
 	}
 
