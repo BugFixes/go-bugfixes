@@ -34,9 +34,9 @@ func (s prettyStack) parse(debugStack []byte, rvr interface{}) ([]byte, error) {
 	buf := &bytes.Buffer{}
 
 	cW(buf, false, bRed, "\n")
-	cW(buf, true, bCyan, " panic: ")
-	cW(buf, true, bBlue, "%v", rvr)
-	cW(buf, false, bWhite, "\n \n")
+//	cW(buf, true, bCyan, " panic: ")
+//	cW(buf, true, bBlue, "%v", rvr)
+//	cW(buf, false, bWhite, "\n \n")
 
 	// process debug stack info
 	stack := strings.Split(string(debugStack), "\n")
