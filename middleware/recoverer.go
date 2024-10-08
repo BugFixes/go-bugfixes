@@ -204,11 +204,12 @@ func (s prettyStack) decorateFuncCallLine(line string, useColor bool, num int) (
 	if idx <= 0 {
 		idx = strings.Index(pkg, ".")
 		if idx <= 0 {
-			method = pkg[0]
-			pkg = pkg[0]
+			method = pkg[0:]
+			pkg = pkg[0:]
+		} else {
+			method = pkg[idx:]
+			pkg = pkg[0:idx]
 		}
-		method = pkg[idx:]
-		pkg = pkg[0:idx]
 	} else {
 		method = pkg[idx+1:]
 		pkg = pkg[0:idx+1]
