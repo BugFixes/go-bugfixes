@@ -201,13 +201,18 @@ func (s prettyStack) decorateFuncCallLine(line string, useColor bool, num int) (
 	method := ""
 
 	idx = strings.LastIndex(pkg, string(os.PathSeparator))
-	if idx < 0 {
+	if idx <= 0 {
 		idx = strings.Index(pkg, ".")
-		method = pkg[idx:]
-		pkg = pkg[0:idx]
+		if idx <= 0 {
+			method = pkg[0:]
+			pkg = pkg[0:]
+		} else {
+			method = pkg[idx:]
+			pkg = pkg[0:idx]
+		}
 	} else {
 		method = pkg[idx+1:]
-		pkg = pkg[0 : idx+1]
+		pkg = pkg[0:idx+1]
 		idx = strings.Index(method, ".")
 		pkg += method[0:idx]
 		method = method[idx:]
@@ -235,11 +240,11 @@ func (s prettyStack) decorateSourceLine(line string, useColor bool, num int) (st
 	}
 
 	buf := &bytes.Buffer{}
-	path := line[0 : idx+3]
+	path := line[0:idx+3]
 	lineno := line[idx+3:]
 
 	idx = strings.LastIndex(path, string(os.PathSeparator))
-	dir := path[0 : idx+1]
+	dir := path[0:idx+1]
 	file := path[idx+1:]
 
 	idx = strings.Index(lineno, " ")
