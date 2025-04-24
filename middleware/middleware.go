@@ -1,16 +1,16 @@
 package middleware
 
 import (
-  "context"
-  "net/http"
+	"context"
+	"net/http"
 )
 
 type System struct {
 	Context context.Context
 
-  // Bugfixes
-  AgentID string
-  Secret string
+	// Bugfixes
+	AgentID string
+	Secret  string
 
 	// Middlewares to use
 	Middlewares []func(handler http.Handler) http.Handler
@@ -28,8 +28,8 @@ func NewMiddleware(ctx context.Context) *System {
 }
 
 func (s *System) SetupBugfixes(id, secret string) {
-  s.AgentID = id
-  s.Secret = secret
+	s.AgentID = id
+	s.Secret = secret
 }
 
 func (s *System) AddMiddleware(middlwares ...func(handler http.Handler) http.Handler) {
@@ -48,12 +48,18 @@ func (s *System) Handler(h http.Handler) http.Handler {
 	return h
 }
 
-func DefaultMiddlware(next http.Handler) http.Handler {
-	s := NewMiddleware(context.Background())
-	s.AddMiddleware(Logger)
-	s.AddMiddleware(RequestID)
-	s.AddMiddleware(Recoverer)
+func DefaultMiddleware(next http.Handler) http.Handler {
+	s := NewDefaultMiddleware(next)
 
 	return s.Handler(next)
 }
 
+func NewDefaultMiddleware(next http.Handler) *System {
+	s := NewMiddleware(context.Background())
+	s.AddMiddleware(Logger)
+	s.AddMiddleware(RequestID)
+	s.AddMiddleware(Recoverer)
+	s.AddMiddleware(LowerCaseHeaders)
+
+	return s
+}
