@@ -36,6 +36,10 @@ func Errorf(format string, inputs ...interface{}) error {
 	return b.Errorf(format, inputs...)
 }
 func (b *BugFixes) Errorf(format string, inputs ...interface{}) error {
+	if b == nil {
+		return Errorf(format, inputs...)
+	}
+
 	b.Level = "error"
 	b.FormattedLog = fmt.Sprintf(format, inputs...)
 	b.FormattedError = fmt.Errorf(format, inputs...)
@@ -68,6 +72,10 @@ func Infof(format string, inputs ...interface{}) string {
 	return b.Infof(format, inputs...)
 }
 func (b *BugFixes) Infof(format string, inputs ...interface{}) string {
+	if b == nil {
+		return Infof(format, inputs...)
+	}
+
 	b.Level = "info"
 	b.FormattedLog = fmt.Sprintf(format, inputs...)
 
@@ -99,6 +107,10 @@ func Debugf(format string, inputs ...interface{}) string {
 	return b.Debugf(format, inputs...)
 }
 func (b *BugFixes) Debugf(format string, inputs ...interface{}) string {
+	if b == nil {
+		return Debugf(format, inputs...)
+	}
+
 	b.Level = "debug"
 	b.FormattedLog = fmt.Sprintf(format, inputs...)
 
@@ -130,6 +142,10 @@ func Logf(format string, inputs ...interface{}) string {
 	return b.Logf(format, inputs...)
 }
 func (b *BugFixes) Logf(format string, inputs ...interface{}) string {
+	if b == nil {
+		return Logf(format, inputs...)
+	}
+
 	b.Level = "log"
 	b.FormattedLog = fmt.Sprintf(format, inputs...)
 
@@ -160,6 +176,10 @@ func Warnf(format string, inputs ...interface{}) string {
 	return b.Warnf(format, inputs...)
 }
 func (b *BugFixes) Warnf(format string, inputs ...interface{}) string {
+	if b == nil {
+		return Warnf(format, inputs...)
+	}
+
 	b.Level = "warn"
 	b.FormattedLog = fmt.Sprintf(format, inputs...)
 
@@ -190,6 +210,10 @@ func Fatalf(format string, inputs ...interface{}) {
 	b.Fatalf(format, inputs...)
 }
 func (b *BugFixes) Fatalf(format string, inputs ...interface{}) {
+	if b == nil {
+		Fatalf(format, inputs...)
+	}
+
 	b.Level = "fatal"
 	b.FormattedLog = fmt.Sprintf(format, inputs...)
 	b.Stack = debug.Stack()
