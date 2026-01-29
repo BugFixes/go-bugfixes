@@ -1,13 +1,10 @@
 package middleware
 
 import (
-	"context"
 	"net/http"
 )
 
 type System struct {
-	Context context.Context
-
 	// Bugfixes
 	AgentID string
 	Secret  string
@@ -21,10 +18,8 @@ type System struct {
 	AllowedMethods []string
 }
 
-func NewMiddleware(ctx context.Context) *System {
-	return &System{
-		Context: ctx,
-	}
+func NewMiddleware() *System {
+	return &System{}
 }
 
 func (s *System) SetupBugfixes(id, secret string) {
@@ -55,7 +50,7 @@ func DefaultMiddleware(next http.Handler) http.Handler {
 }
 
 func NewDefaultMiddleware(next http.Handler) *System {
-	s := NewMiddleware(context.Background())
+	s := NewMiddleware()
 	s.AddMiddleware(Logger)
 	s.AddMiddleware(RequestID)
 	s.AddMiddleware(Recoverer)
