@@ -12,17 +12,17 @@ func LowerCaseHeaders(next http.Handler) http.Handler {
 
 func (s *System) LCHeaders(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		// Iterate over the request headers
+		extras := make(http.Header)
 		for k, v := range r.Header {
-			// Create a lowercase version of the key
 			lcKey := strings.ToLower(k)
-
-			// Add the lowercase key with the same values
-			// This won't overwrite the original header
-			r.Header[lcKey] = v
+			if lcKey != k {
+				extras[lcKey] = v
+			}
+		}
+		for k, v := range extras {
+			r.Header[k] = v
 		}
 
-		// Call the next handler in the chain
 		next.ServeHTTP(w, r)
 	})
 }

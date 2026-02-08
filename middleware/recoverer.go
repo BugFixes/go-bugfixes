@@ -143,9 +143,17 @@ func (s prettyStack) bugParse(debugStack []byte, rvr interface{}) (BugFixesSend,
 		lines[i], lines[opp] = lines[opp], lines[i]
 	}
 
+	if len(lines) < 2 {
+		return bug, fmt.Errorf("insufficient stack lines to parse bug")
+	}
+
 	bugLine := lines[1]
 	i := strings.Index(bugLine, " ")
-	bug.BugLine = bugLine[:i]
+	if i < 0 {
+		bug.BugLine = bugLine
+	} else {
+		bug.BugLine = bugLine[:i]
+	}
 
 	file, line, lineNumber, err := ParseBugLine(lines[1])
 	if err != nil {

@@ -88,18 +88,18 @@ func (s *System) SendToBugfixes(rvr interface{}, client http.Client) {
 		return
 	}
 	request, err := http.NewRequest("POST", bugServer, bytes.NewBuffer(body))
-	request.Header.Set("Content-Type", "application/json")
-	request.Header.Set("X-API-KEY", s.AgentID)
-	request.Header.Set("X-API-SECRET", s.Secret)
 	if err != nil {
 		if _, errs := fmt.Fprintf(out, "bugfixes: failed to new request: %v", err); errs != nil {
 			log.Fatal(errs)
 		}
-		if _, err := os.Stderr.Write(out.Bytes()); err != nil {
-			log.Fatal(err)
+		if _, errs := os.Stderr.Write(out.Bytes()); errs != nil {
+			log.Fatal(errs)
 		}
 		return
 	}
+	request.Header.Set("Content-Type", "application/json")
+	request.Header.Set("X-API-KEY", s.AgentID)
+	request.Header.Set("X-API-SECRET", s.Secret)
 
 	resp, err := client.Do(request)
 	if err != nil {
@@ -124,7 +124,13 @@ func (s *System) SendToBugfixes(rvr interface{}, client http.Client) {
 
 func ParseBugLine(bugLine string) (string, string, int, error) {
 	i := strings.Index(bugLine, ":")
+	if i < 0 {
+		return "", "", 0, fmt.Errorf("failed to find ':' in bug line: %s", bugLine)
+	}
 	j := strings.Index(bugLine, " ")
+	if j < 0 {
+		return "", "", 0, fmt.Errorf("failed to find ' ' in bug line: %s", bugLine)
+	}
 	file := bugLine[:i]
 	lne := bugLine[i+1 : j]
 	line, err := strconv.Atoi(lne)

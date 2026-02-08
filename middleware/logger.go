@@ -187,13 +187,20 @@ func (l *defaultLogEntry) Write(status, bytes int, elapsed time.Duration) {
 		cW(l.buf, l.useColor, nRed, "%s", elapsed)
 	}
 
-  if status == 200 {
-    if l.LogLevel <= Info {
-      l.Logger.Print(l.buf.String())
-    }
-  } else {
-    l.Logger.Print(l.buf.String())
-  }
+	if statusLevel(status) >= l.LogLevel {
+		l.Logger.Print(l.buf.String())
+	}
+}
+
+func statusLevel(status int) Level {
+	switch {
+	case status < 400:
+		return Info
+	case status < 500:
+		return Error
+	default:
+		return Fatal
+	}
 }
 
 func (l *defaultLogEntry) Panic(v interface{}) {
