@@ -47,6 +47,12 @@ func (s *System) CORS(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		originalOrigin := r.Header.Get("Origin")
 
+		// No Origin header means this is not a CORS request, let it through
+		if originalOrigin == "" {
+			next.ServeHTTP(w, r)
+			return
+		}
+
 		isAllowed := s.wildcardEnabled()
 		for _, origin := range s.AllowedOrigins {
 			if origin == originalOrigin {
@@ -60,17 +66,21 @@ func (s *System) CORS(next http.Handler) http.Handler {
 			return
 		}
 
-		w.Header().Set("Access-Control-Allow-Origin", originalOrigin)
+		if s.wildcardEnabled() {
+			w.Header().Set("Access-Control-Allow-Origin", "*")
+		} else {
+			w.Header().Set("Access-Control-Allow-Origin", originalOrigin)
+		}
 		w.Header().Set("Access-Control-Allow-Methods", s.getAllowedMethods())
 		w.Header().Set("Access-Control-Allow-Headers", s.getAllowedHeaders())
 		w.Header().Set("Access-Control-Max-Age", "86400")
-		w.Header().Set("Var", "Origin")
-		
+		w.Header().Set("Vary", "Origin")
+
 		if r.Method == http.MethodOptions {
 			w.WriteHeader(http.StatusOK)
 			return
 		}
-		
+
 		next.ServeHTTP(w, r)
 	})
 }
