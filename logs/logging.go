@@ -278,7 +278,7 @@ func (b *BugFixes) makePretty() {
 		log = b.FormattedError.Error()
 
 	default:
-		cW(out, true, bWhite, fmt.Sprintf("%s:", b.Level))
+		cW(out, true, bWhite, "%s:", b.Level)
 	}
 
 	// print to stdout if the level is high enough

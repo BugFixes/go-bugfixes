@@ -1,111 +1,58 @@
-SERVICE_NAME=celeste
-STACK_TIME=$(shell date "+%y-%m-%d_%H-%M")
--include .env
-export
+SHELL := /usr/bin/env bash
 
-.PHONY: setup
-setup: ## Get linting stuffs
-	go get github.com/golangci/golangci-lint/cmd/golangci-lint
-	go get golang.org/x/tools/cmd/goimports
+GO ?= go
+GO_PACKAGES := ./...
+TOOLS_BIN := $(CURDIR)/bin
+GOLANGCI_LINT := $(TOOLS_BIN)/golangci-lint
+GOIMPORTS := $(TOOLS_BIN)/goimports
+GOFILES := $(shell find . -type f -name '*.go' -not -path './.cache/*')
 
-.PHONY: build
-build: lint ## Build the app
-	go build -ldflags "-w -s -X github.com/bugfixes/${SEVICE_NAME}/internal/app.version=`git describe --tags --dirty` -X github.com/bugfixes/${SERVICE_NAME}/internal/app.commitHash=`git rev-parse HEAD`" -race -o ./bin/${SERVICE_NAME} -v ./cmd/${SERVICE_NAME}/${SEVICE_NAME}.go
+export GOCACHE := $(CURDIR)/.cache/go-build
+export GOMODCACHE := $(CURDIR)/.cache/go-mod
+export GOTMPDIR := $(CURDIR)/.cache/tmp
 
-.PHONY: test
-test: lint ## Test the app
-	go test -v -race -bench=./... -benchmem -timeout=120s -cover -coverprofile=./coverage.txt -bench=./... ./...
+.PHONY: all
+all: check
 
-.PHONY: run
-run: build ## Build and run
-	bin/${SERVICE_NAME}
+.PHONY: tools
+tools: $(GOLANGCI_LINT) $(GOIMPORTS)
 
-.PHONY: lambda
-lambda: ## Run the lambda version
-	go build ./cmd/main
+$(GOLANGCI_LINT):
+	@mkdir -p "$(TOOLS_BIN)" "$(GOCACHE)" "$(GOMODCACHE)" "$(GOTMPDIR)"
+	GOBIN="$(TOOLS_BIN)" $(GO) install github.com/golangci/golangci-lint/cmd/golangci-lint@latest
 
-.PHONY: mocks
-mocks: ## Generate the mocks
-	go generate ./...
+$(GOIMPORTS):
+	@mkdir -p "$(TOOLS_BIN)" "$(GOCACHE)" "$(GOMODCACHE)" "$(GOTMPDIR)"
+	GOBIN="$(TOOLS_BIN)" $(GO) install golang.org/x/tools/cmd/goimports@latest
 
-.PHONY: full
-full: clean build fmt lint test ## Clean, build, make sure its formatted, linted, and test it
-
-.PHONY: docker-up
-docker-up: docker-start sleepy ## Start docker
-
-docker-start: ## Docker Start
-	docker compose -p ${SERVICE_NAME} --project-directory=docker -f docker-compose.yml up -d
-
-docker-stop: ## Docker Stop
-	docker compose -p ${SERVICE_NAME} --project-directory=docker -f docker-compose.yml down
-
-.PHONY: docker-down
-docker-down: docker-stop ## Stop docker
-
-.PHONY: docker-restart
-docker-restart: docker-down docker-up ## Restart Docker
-
-.PHONY: docker-logs
-docker-logs: ## Follow the logs
-	docker logs -f ${SERVICE_NAME}_localstack_1
-
-.PHONY: lint
-lint: ## Lint
-	golangci-lint run --config configs/golangci.yml
+.PHONY: tidy
+tidy:
+	@mkdir -p "$(GOCACHE)" "$(GOMODCACHE)" "$(GOTMPDIR)"
+	$(GO) mod tidy
 
 .PHONY: fmt
-fmt: ## Formatting
-	gofmt -w -s .
-	goimports -w .
-	go clean ./...
+fmt: tools
+	gofmt -w -s $(GOFILES)
+	$(GOIMPORTS) -w $(GOFILES)
 
-.PHONY: pre-commit
-pre-commit: fmt lint ## Do formatting and linting
+.PHONY: lint
+lint: $(GOLANGCI_LINT)
+	$(GOLANGCI_LINT) run --config configs/golangci.yml
+
+.PHONY: test
+test:
+	@mkdir -p "$(GOCACHE)" "$(GOMODCACHE)" "$(GOTMPDIR)"
+	$(GO) test $(GO_PACKAGES)
+
+.PHONY: test-race
+test-race:
+	@mkdir -p "$(GOCACHE)" "$(GOMODCACHE)" "$(GOTMPDIR)"
+	$(GO) test -race -covermode=atomic -coverprofile=coverage.txt $(GO_PACKAGES)
+
+.PHONY: check
+check: lint test-race
 
 .PHONY: clean
-clean: ## Clean
-	go clean ./...
-	rm -rf bin/${SERVICE_NAME}
-
-sleepy: ## Sleepy
-	sleep 60
-
-.PHONY: cloud-up
-cloud-up: docker-start sleepy stack-create ## CloudFormation Up
-
-.PHONY: cloud-restart
-cloud-restart: docker-down cloud-up
-
-.PHONY: stack-create
-stack-create: # Create the stack
-	aws cloudformation create-stack \
-  		--template-body file://docker/cloudformation.yaml \
-  		--stack-name ${SERVICE_NAME}-$(STACK_TIME) \
-  		--endpoint https://localhost.localstack.cloud:4566 \
-  		--region us-east-1 \
-  		1> /dev/null
-
-.PHONY: stack-delete
-stack-delete: # Delete the stack
-	aws cloudformation delete-stack \
-		--stack-name ${SERVICE_NAME}-$(STACK_TIME) \
-		--endpoint http://localhost.localstack.cloud:4566 \
-		--region us-east-1
-
-
-.PHONY: bucket-up
-bucket-up: bucket-create bucket-upload ## S3 Bucket Up
-
-bucket-create: ## Create the bucket for builds
-	aws s3api create-bucket \
-		--endpoint https://localhost.localstack.cloud:4566 \
-		--bucket celeste \
-		--quiet
-
-bucket-upload: build-aws ## Put the build in the bucket
-	aws s3 cp bin/celeste-local.zip s3://celeste/celeste-local.zip --endpoint https://localhost.localstack.cloud:4566
-
-build-aws: ## Build for AWS
-	GOOS=linux GOARCH=amd64 go build -o bin/celeste ./cmd/main
-	zip bin/celeste-local.zip bin/celeste
+clean:
+	$(GO) clean ./...
+	rm -rf "$(TOOLS_BIN)" "$(CURDIR)/.cache" coverage.txt
