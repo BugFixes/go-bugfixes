@@ -10,6 +10,8 @@ import (
 	"runtime/debug"
 	"strconv"
 	"strings"
+
+	bugfixes "github.com/bugfixes/go-bugfixes"
 )
 
 type BugFixesSend struct {
@@ -43,20 +45,19 @@ func (k *contextKey) String() string {
 }
 
 func SendToBugfixes(rvr interface{}, client http.Client) {
-	agentKey := os.Getenv("BUGFIXES_AGENT_KEY")
-	agentSecret := os.Getenv("BUGFIXES_AGENT_SECRET")
-	if agentKey == "" || agentSecret == "" {
+	cfg := bugfixes.GetDefaultConfig()
+	if cfg.AgentKey == "" || cfg.AgentSecret == "" {
 		return
 	}
 
 	s := &System{
-		AgentID: agentKey,
-		Secret:  agentSecret,
+		Config: &cfg,
 	}
 	s.SendToBugfixes(rvr, client)
 }
 
 func (s *System) SendToBugfixes(rvr interface{}, client http.Client) {
+	cfg := s.config()
 	debugStack := debug.Stack()
 	p := prettyStack{}
 	out := &bytes.Buffer{}
@@ -71,12 +72,6 @@ func (s *System) SendToBugfixes(rvr interface{}, client http.Client) {
 		return
 	}
 
-	bugServer := "https://api.bugfix.es/v1"
-	if bugServerEnv := os.Getenv("BUGFIXES_SERVER"); bugServerEnv != "" {
-		bugServer = bugServerEnv
-	}
-	bugServer = fmt.Sprintf("%s/bug", bugServer)
-
 	body, err := json.Marshal(bug)
 	if err != nil {
 		if _, errs := fmt.Fprintf(out, "bugfixes: failed to marshall bug: %v", err); errs != nil {
@@ -87,7 +82,7 @@ func (s *System) SendToBugfixes(rvr interface{}, client http.Client) {
 		}
 		return
 	}
-	request, err := http.NewRequest("POST", bugServer, bytes.NewBuffer(body))
+	request, err := http.NewRequest("POST", cfg.BugEndpoint(), bytes.NewBuffer(body))
 	if err != nil {
 		if _, errs := fmt.Fprintf(out, "bugfixes: failed to new request: %v", err); errs != nil {
 			log.Fatal(errs)
@@ -98,8 +93,8 @@ func (s *System) SendToBugfixes(rvr interface{}, client http.Client) {
 		return
 	}
 	request.Header.Set("Content-Type", "application/json")
-	request.Header.Set("X-API-KEY", s.AgentID)
-	request.Header.Set("X-API-SECRET", s.Secret)
+	request.Header.Set("X-API-KEY", cfg.AgentKey)
+	request.Header.Set("X-API-SECRET", cfg.AgentSecret)
 
 	resp, err := client.Do(request)
 	if err != nil {
@@ -120,6 +115,21 @@ func (s *System) SendToBugfixes(rvr interface{}, client http.Client) {
 		}
 		return
 	}
+}
+
+func (s *System) config() bugfixes.Config {
+	cfg := bugfixes.GetDefaultConfig()
+	if s != nil && s.Config != nil {
+		cfg = cfg.Merge(*s.Config)
+	}
+	if s != nil {
+		cfg = cfg.Merge(bugfixes.Config{
+			AgentKey:    s.AgentID,
+			AgentSecret: s.Secret,
+		})
+	}
+
+	return cfg
 }
 
 func ParseBugLine(bugLine string) (string, string, int, error) {

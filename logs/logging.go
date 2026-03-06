@@ -12,6 +12,7 @@ import (
 	"strings"
 	"time"
 
+	bugfixes "github.com/bugfixes/go-bugfixes"
 	"github.com/go-logfmt/logfmt"
 )
 
@@ -38,6 +39,8 @@ type BugFixes struct {
 	// Creds
 	AgentID string
 	Secret  string
+
+	Config *bugfixes.Config `json:"-"`
 }
 
 func NewBugFixes(err error) error {
@@ -53,6 +56,10 @@ func NewBugFixes(err error) error {
 func (b *BugFixes) Setup(id, secret string) {
 	b.AgentID = id
 	b.Secret = secret
+}
+
+func (b *BugFixes) SetConfig(cfg bugfixes.Config) {
+	b.Config = &cfg
 }
 
 const (
@@ -140,6 +147,8 @@ func (b *BugFixes) skipDepth(depth int) {
 }
 
 func (b *BugFixes) DoReporting() {
+	cfg := b.config()
+
 	b.skipDepth(defaultSkipDepth)
 	if b.SkipDepthOverride != 0 {
 		b.skipDepth(b.SkipDepthOverride)
@@ -161,20 +170,18 @@ func (b *BugFixes) DoReporting() {
 	// Make it pretty
 	b.makePretty()
 
-	// Do we keep it local no matter what
-	keepLocal := os.Getenv("BUGFIXES_LOCAL_ONLY")
-	if keepLocal == "true" || b.LocalOnly {
+	if cfg.LocalOnly {
 		return
 	}
 
 	// Log level
-	reportLogLevel := ConvertLevelFromString(os.Getenv("BUGFIXES_LOG_LEVEL"))
+	reportLogLevel := ConvertLevelFromString(cfg.LogLevel)
 	logLevel := ConvertLevelFromString(b.Level)
 	if reportLogLevel > logLevel {
 		return
 	}
 
-	b.sendLog()
+	b.sendLog(cfg)
 }
 
 func (b *BugFixes) logFormat() {
@@ -204,19 +211,13 @@ func (b *BugFixes) logFormat() {
 	b.LogFmt = out.String()
 }
 
-func (b *BugFixes) sendLog() {
-	bugServer := "https://api.bugfix.es/v1"
-	if bugServerEnv := os.Getenv("BUGFIXES_SERVER"); bugServerEnv != "" {
-		bugServer = bugServerEnv
-	}
-	bugServer = fmt.Sprintf("%s/log", bugServer)
-
-	if b.AgentID == "" || b.Secret == "" {
+func (b *BugFixes) sendLog(cfg bugfixes.Config) {
+	if cfg.AgentKey == "" || cfg.AgentSecret == "" {
 		fmt.Printf("cant send to server till you have created an agent and set the keys\n")
-		if b.AgentID == "" {
+		if cfg.AgentKey == "" {
 			fmt.Printf("env: BUGFIXES_AGENT_KEY missing\n")
 		}
-		if b.Secret == "" {
+		if cfg.AgentSecret == "" {
 			fmt.Printf("env: BUGFIXES_AGENT_SECRET missing\n")
 		}
 		return
@@ -228,14 +229,14 @@ func (b *BugFixes) sendLog() {
 		return
 	}
 
-	request, err := http.NewRequest("POST", bugServer, bytes.NewBuffer(body))
+	request, err := http.NewRequest("POST", cfg.LogEndpoint(), bytes.NewBuffer(body))
 	if err != nil {
 		fmt.Printf("bugfixes sendLog newRequest: %+v\n", err)
 		return
 	}
 	request.Header.Set("Content-Type", "application/json")
-	request.Header.Set("X-API-KEY", b.AgentID)
-	request.Header.Set("X-API-SECRET", b.Secret)
+	request.Header.Set("X-API-KEY", cfg.AgentKey)
+	request.Header.Set("X-API-SECRET", cfg.AgentSecret)
 
 	client := http.Client{
 		Timeout: 5 * time.Second,
@@ -256,6 +257,7 @@ func (b *BugFixes) sendLog() {
 func (b *BugFixes) makePretty() {
 	out := &bytes.Buffer{}
 	log := b.FormattedLog
+	cfg := b.config()
 
 	switch b.Level {
 	case "warn":
@@ -277,9 +279,9 @@ func (b *BugFixes) makePretty() {
 	}
 
 	// print to stdout if the level is high enough
-	reportLogLevel := ConvertLevelFromString(os.Getenv("BUGFIXES_LOG_LEVEL"))
+	reportLogLevel := ConvertLevelFromString(cfg.LogLevel)
 	logLevel := ConvertLevelFromString(b.Level)
-	if logLevel >= reportLogLevel || reportLogLevel == LevelUnknown || b.LocalOnly {
+	if logLevel >= reportLogLevel || reportLogLevel == LevelUnknown || cfg.LocalOnly {
 		fmt.Printf("%s %s >> %s:%d >> %s\n", out, time.Now().Format("2006-01-02 15:04:05"), b.File, b.LineNumber, log)
 	}
 
@@ -290,6 +292,22 @@ func (b *BugFixes) makePretty() {
 		PrintPrettyStack(b.Stack)
 		return
 	}
+}
+
+func (b *BugFixes) config() bugfixes.Config {
+	cfg := bugfixes.GetDefaultConfig()
+	if b != nil && b.Config != nil {
+		cfg = cfg.Merge(*b.Config)
+	}
+	if b != nil {
+		cfg = cfg.Merge(bugfixes.Config{
+			AgentKey:    b.AgentID,
+			AgentSecret: b.Secret,
+			LocalOnly:   b.LocalOnly,
+		})
+	}
+
+	return cfg
 }
 
 var (

@@ -33,14 +33,14 @@ func TestConvertLevelFromString(t *testing.T) {
 		input  string
 		output int
 	}{
-		{"log", 1},
+		{"log", 2},
 		{"debug", 1},
-		{"info", 2},
-		{"warn", 3},
-		{"error", 4},
-		{"crash", 5},
-		{"panic", 5},
-		{"fatal", 5},
+		{"info", 3},
+		{"warn", 4},
+		{"error", 5},
+		{"crash", 6},
+		{"panic", 6},
+		{"fatal", 6},
 		{"unknown", 9},
 		{"10", 9},
 		{"unrecognized", 9},
