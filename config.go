@@ -27,7 +27,10 @@ func LoadConfigFromEnv() Config {
 	localOnlyStr := strings.TrimSpace(os.Getenv("BUGFIXES_LOCAL_ONLY"))
 	localOnly, err := strconv.ParseBool(localOnlyStr)
 	if err != nil && localOnlyStr != "" {
-		fmt.Fprintf(os.Stderr, "bugfixes: invalid BUGFIXES_LOCAL_ONLY value %q, defaulting to false\n", localOnlyStr)
+		_, err := fmt.Fprintf(os.Stderr, "bugfixes: invalid BUGFIXES_LOCAL_ONLY value %q, defaulting to false\n", localOnlyStr)
+		if err != nil {
+			return Config{}
+		}
 	}
 
 	return Config{
@@ -81,7 +84,9 @@ func (c Config) Merge(override Config) Config {
 	if override.LogLevel != "" {
 		merged.LogLevel = override.LogLevel
 	}
-	merged.LocalOnly = override.LocalOnly
+	if override.LocalOnly {
+		merged.LocalOnly = true
+	}
 
 	return merged.normalized()
 }
