@@ -20,8 +20,6 @@ var (
 	bMagenta = term.BMagenta
 	bCyan    = term.BCyan
 	bWhite   = term.BWhite
-
-	reset = term.Reset
 )
 
 // IsTTY reports whether stdout appears to be a terminal.
