@@ -2,13 +2,19 @@ package bugfixes
 
 import (
 	"fmt"
+	"net/http"
 	"os"
 	"strconv"
 	"strings"
 	"sync"
+	"time"
 )
 
 const DefaultServer = "https://api.bugfix.es/v1"
+
+const DefaultTimeout = 10 * time.Second
+
+var defaultHTTPClient = &http.Client{Timeout: DefaultTimeout}
 
 type Config struct {
 	Server      string
@@ -16,6 +22,7 @@ type Config struct {
 	AgentSecret string
 	LogLevel    string
 	LocalOnly   bool
+	HTTPClient  *http.Client
 }
 
 var (
@@ -85,8 +92,20 @@ func (c Config) Merge(override Config) Config {
 	if override.LocalOnly {
 		merged.LocalOnly = true
 	}
+	if override.HTTPClient != nil {
+		merged.HTTPClient = override.HTTPClient
+	}
 
 	return merged.normalized()
+}
+
+// GetHTTPClient returns the configured HTTP client, or a default client
+// with a 10-second timeout.
+func (c Config) GetHTTPClient() *http.Client {
+	if c.HTTPClient != nil {
+		return c.HTTPClient
+	}
+	return defaultHTTPClient
 }
 
 func (c Config) LogEndpoint() string {

@@ -7,7 +7,7 @@
 
 ## Requirements
 
-The library targets Go 1.24+.
+The library targets Go 1.26+.
 
 To send logs or panic reports to Bugfixes, set:
 

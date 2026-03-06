@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
-	"log"
 	"os"
 	"runtime/debug"
 	"strings"
@@ -18,14 +17,10 @@ func PrintPrettyStack(rvr interface{}) {
 	s := prettyStack{}
 	out, err := s.parse(debugStack, rvr)
 	if err == nil {
-		if _, errs := os.Stderr.Write(out); errs != nil {
-			log.Fatal(errs)
-		}
+		_, _ = os.Stderr.Write(out)
 	} else {
 		// print stdlib output as a fallback
-		if _, errs := os.Stderr.Write(debugStack); errs != nil {
-			log.Fatal(errs)
-		}
+		_, _ = os.Stderr.Write(debugStack)
 	}
 }
 

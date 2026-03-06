@@ -1,55 +1,37 @@
 package middleware
 
 import (
-	"fmt"
 	"io"
-	"os"
+
+	"github.com/bugfixes/go-bugfixes/internal/term"
 )
 
 var (
 	// Normal colors
-	nRed    = []byte{'\033', '[', '3', '1', 'm'}
-	nGreen  = []byte{'\033', '[', '3', '2', 'm'}
-	nYellow = []byte{'\033', '[', '3', '3', 'm'}
-	nCyan   = []byte{'\033', '[', '3', '6', 'm'}
+	nRed    = term.NRed
+	nGreen  = term.NGreen
+	nYellow = term.NYellow
+	nCyan   = term.NCyan
 	// Bright colors
-	bRed     = []byte{'\033', '[', '3', '1', ';', '1', 'm'}
-	bGreen   = []byte{'\033', '[', '3', '2', ';', '1', 'm'}
-	bYellow  = []byte{'\033', '[', '3', '3', ';', '1', 'm'}
-	bBlue    = []byte{'\033', '[', '3', '4', ';', '1', 'm'}
-	bMagenta = []byte{'\033', '[', '3', '5', ';', '1', 'm'}
-	bCyan    = []byte{'\033', '[', '3', '6', ';', '1', 'm'}
-	bWhite   = []byte{'\033', '[', '3', '7', ';', '1', 'm'}
+	bRed     = term.BRed
+	bGreen   = term.BGreen
+	bYellow  = term.BYellow
+	bBlue    = term.BBlue
+	bMagenta = term.BMagenta
+	bCyan    = term.BCyan
+	bWhite   = term.BWhite
 
-	reset = []byte{'\033', '[', '0', 'm'}
+	reset = term.Reset
 )
 
+// IsTTY reports whether stdout appears to be a terminal.
 var IsTTY bool
 
 func init() {
-	// This is sort of cheating: if stdout is a character device, we assume
-	// that means it's a TTY. Unfortunately, there are many non-TTY
-	// character devices, but fortunately stdout is rarely set to any of
-	// them.
-	//
-	// We could solve this properly by pulling in a dependency on
-	// code.google.com/p/go.crypto/ssh/terminal, for instance, but as a
-	// heuristic for whether to print in color or in black-and-white, I'd
-	// really rather not.
-	fi, err := os.Stdout.Stat()
-	if err == nil {
-		m := os.ModeDevice | os.ModeCharDevice
-		IsTTY = fi.Mode()&m == m
-	}
+	IsTTY = term.IsTTY
 }
 
-// colorWrite
+// cW writes a color-formatted string to w.
 func cW(w io.Writer, useColor bool, color []byte, s string, args ...interface{}) {
-	if IsTTY && useColor {
-		_, _ = w.Write(color)
-	}
-	_, _ = fmt.Fprintf(w, s, args...)
-	if IsTTY && useColor {
-		_, _ = w.Write(reset)
-	}
+	term.CW(w, useColor, color, s, args...)
 }

@@ -81,10 +81,8 @@ func TestHandler_MultipleMiddlewares_AppliedInOrder(t *testing.T) {
 
 	handler.ServeHTTP(rr, req)
 
-	// Middlewares wrap in order, so second wraps first's result
-	// Execution order: second -> first -> handler
-	assert.Len(t, order, 3)
-	assert.Equal(t, "handler", order[len(order)-1])
+	// Middlewares execute in registration order: first -> second -> handler
+	assert.Equal(t, []string{"first", "second", "handler"}, order)
 }
 
 func TestNewMiddleware_ReturnsCleanSystem(t *testing.T) {

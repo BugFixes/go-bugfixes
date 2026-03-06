@@ -2,11 +2,14 @@ package middleware
 
 import (
 	"net/http"
+	"sync"
 
 	bugfixes "github.com/bugfixes/go-bugfixes"
 )
 
 type System struct {
+	mu sync.RWMutex
+
 	// Bugfixes
 	AgentID string
 	Secret  string
@@ -26,25 +29,38 @@ func NewMiddleware() *System {
 }
 
 func (s *System) SetupBugfixes(id, secret string) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
 	s.AgentID = id
 	s.Secret = secret
 }
 
 func (s *System) SetConfig(cfg bugfixes.Config) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
 	s.Config = &cfg
 }
 
 func (s *System) AddMiddleware(middlewares ...func(handler http.Handler) http.Handler) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
 	s.Middlewares = append(s.Middlewares, middlewares...)
 }
 
+// Handler applies the registered middlewares to h.
+// Middlewares execute in registration order: the first middleware added
+// is the outermost handler (runs first).
 func (s *System) Handler(h http.Handler) http.Handler {
+	s.mu.RLock()
+	defer s.mu.RUnlock()
+
 	if len(s.Middlewares) == 0 {
 		return h
 	}
 
-	for _, middleware := range s.Middlewares {
-		h = middleware(h)
+	// Apply in reverse so the first-registered middleware wraps outermost.
+	for i := len(s.Middlewares) - 1; i >= 0; i-- {
+		h = s.Middlewares[i](h)
 	}
 
 	return h
