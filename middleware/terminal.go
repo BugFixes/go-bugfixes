@@ -3,7 +3,6 @@ package middleware
 import (
 	"fmt"
 	"io"
-	"log"
 	"os"
 )
 
@@ -49,9 +48,7 @@ func cW(w io.Writer, useColor bool, color []byte, s string, args ...interface{})
 	if IsTTY && useColor {
 		_, _ = w.Write(color)
 	}
-	if _, errs := fmt.Fprintf(w, s, args...); errs != nil {
-		log.Fatal(errs)
-	}
+	_, _ = fmt.Fprintf(w, s, args...)
 	if IsTTY && useColor {
 		_, _ = w.Write(reset)
 	}

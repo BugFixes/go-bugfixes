@@ -272,7 +272,9 @@ func (b *BugFixes) makePretty() {
 
 	case "error":
 		cW(out, true, bRed, "Error:")
-		log = b.FormattedError.Error()
+		if b.FormattedError != nil {
+			log = b.FormattedError.Error()
+		}
 
 	default:
 		cW(out, true, bWhite, "%s:", b.Level)

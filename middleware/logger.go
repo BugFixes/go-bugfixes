@@ -100,7 +100,7 @@ type LogFormatter interface {
 // LogEntry records the final log when a request completes.
 // See defaultLogEntry for an example implementation.
 type LogEntry interface {
-	Write(status, bytes int, elapsed time.Duration)
+	Write(status int, bytes int64, elapsed time.Duration)
 	Panic(v interface{})
 }
 
@@ -165,7 +165,7 @@ type defaultLogEntry struct {
 	useColor bool
 }
 
-func (l *defaultLogEntry) Write(status, bytes int, elapsed time.Duration) {
+func (l *defaultLogEntry) Write(status int, bytes int64, elapsed time.Duration) {
 	switch {
 	case status < 200:
 		cW(l.buf, l.useColor, bBlue, "%03d", status)

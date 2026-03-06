@@ -1,6 +1,7 @@
 package bugfixes
 
 import (
+	"fmt"
 	"os"
 	"strconv"
 	"strings"
@@ -23,7 +24,11 @@ var (
 )
 
 func LoadConfigFromEnv() Config {
-	localOnly, _ := strconv.ParseBool(strings.TrimSpace(os.Getenv("BUGFIXES_LOCAL_ONLY")))
+	localOnlyStr := strings.TrimSpace(os.Getenv("BUGFIXES_LOCAL_ONLY"))
+	localOnly, err := strconv.ParseBool(localOnlyStr)
+	if err != nil && localOnlyStr != "" {
+		fmt.Fprintf(os.Stderr, "bugfixes: invalid BUGFIXES_LOCAL_ONLY value %q, defaulting to false\n", localOnlyStr)
+	}
 
 	return Config{
 		Server:      valueOrDefault(os.Getenv("BUGFIXES_SERVER"), DefaultServer),
@@ -76,9 +81,7 @@ func (c Config) Merge(override Config) Config {
 	if override.LogLevel != "" {
 		merged.LogLevel = override.LogLevel
 	}
-	if override.LocalOnly {
-		merged.LocalOnly = true
-	}
+	merged.LocalOnly = override.LocalOnly
 
 	return merged.normalized()
 }

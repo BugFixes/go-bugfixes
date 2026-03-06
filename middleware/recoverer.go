@@ -37,7 +37,7 @@ func (s *System) Recoverer(next http.Handler) http.Handler {
 
 				w.WriteHeader(http.StatusInternalServerError)
 
-				go s.SendToBugfixes(rvr, http.Client{
+				s.SendToBugfixes(rvr, http.Client{
 					Timeout: time.Second * 10,
 				})
 			}
