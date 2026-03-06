@@ -57,12 +57,12 @@ func SendToBugfixes(rvr interface{}) {
 }
 
 func (s *System) SendToBugfixes(rvr interface{}) {
-	go s.sendToBugfixes(rvr)
+	stack := debug.Stack()
+	go s.sendToBugfixes(rvr, stack)
 }
 
-func (s *System) sendToBugfixes(rvr interface{}) {
+func (s *System) sendToBugfixes(rvr interface{}, debugStack []byte) {
 	cfg := s.config()
-	debugStack := debug.Stack()
 	p := prettyStack{}
 	bug, err := p.bugParse(debugStack, rvr)
 	if err != nil {

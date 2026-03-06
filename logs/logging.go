@@ -169,7 +169,12 @@ func (b *BugFixes) DoReporting() {
 		return
 	}
 
-	go b.sendLog(cfg)
+	body, err := json.Marshal(b)
+	if err != nil {
+		fmt.Printf("bugfixes sendLog marshal: %+v\n", err)
+		return
+	}
+	go b.sendLogBody(cfg, body)
 }
 
 func (b *BugFixes) logFormat() {
@@ -199,7 +204,7 @@ func (b *BugFixes) logFormat() {
 	b.LogFmt = out.String()
 }
 
-func (b *BugFixes) sendLog(cfg bugfixes.Config) {
+func (b *BugFixes) sendLogBody(cfg bugfixes.Config, body []byte) {
 	if cfg.AgentKey == "" || cfg.AgentSecret == "" {
 		fmt.Printf("cant send to server till you have created an agent and set the keys\n")
 		if cfg.AgentKey == "" {
@@ -208,12 +213,6 @@ func (b *BugFixes) sendLog(cfg bugfixes.Config) {
 		if cfg.AgentSecret == "" {
 			fmt.Printf("env: BUGFIXES_AGENT_SECRET missing\n")
 		}
-		return
-	}
-
-	body, err := json.Marshal(b)
-	if err != nil {
-		fmt.Printf("bugfixes sendLog marshal: %+v\n", err)
 		return
 	}
 
