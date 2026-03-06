@@ -212,6 +212,7 @@ func Fatalf(format string, inputs ...interface{}) {
 func (b *BugFixes) Fatalf(format string, inputs ...interface{}) {
 	if b == nil {
 		Fatalf(format, inputs...)
+		return
 	}
 
 	b.Level = "fatal"

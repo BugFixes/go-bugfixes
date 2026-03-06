@@ -72,12 +72,12 @@ const (
 )
 
 const (
-	LevelLog     = 1
 	LevelDebug   = 1
-	LevelInfo    = 2
-	LevelWarn    = 3
-	LevelError   = 4
-	LevelCrash   = 5
+	LevelLog     = 2
+	LevelInfo    = 3
+	LevelWarn    = 4
+	LevelError   = 5
+	LevelCrash   = 6
 	LevelUnknown = 9
 )
 
@@ -163,7 +163,7 @@ func (b *BugFixes) DoReporting() {
 
 	// Do we keep it local no matter what
 	keepLocal := os.Getenv("BUGFIXES_LOCAL_ONLY")
-	if keepLocal == "" || keepLocal == "true" || b.LocalOnly {
+	if keepLocal == "true" || b.LocalOnly {
 		return
 	}
 
@@ -227,11 +227,6 @@ func (b *BugFixes) sendLog() {
 		fmt.Printf("bugfixes sendLog marshal: %+v\n", err)
 		return
 	}
-  	a := fmt.Sprintf("%s", body) // debugging purposes
-  	_ = fmt.Sprint(a)
-
-	ac := fmt.Sprintf("id: %s, secret: %s", b.AgentID, b.Secret)
-	_ = fmt.Sprint(ac)
 
 	request, err := http.NewRequest("POST", bugServer, bytes.NewBuffer(body))
 	if err != nil {
@@ -264,7 +259,7 @@ func (b *BugFixes) makePretty() {
 
 	switch b.Level {
 	case "warn":
-		cW(out, true, bBlue, "Warning:")
+		cW(out, true, bYellow, "Warning:")
 	case "info":
 		cW(out, true, bYellow, "Info:")
 
