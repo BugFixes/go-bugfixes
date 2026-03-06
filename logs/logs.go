@@ -21,6 +21,9 @@ func Local(skipDepthOverride ...int) *BugFixes {
 
 // <editor-fold desc="Error">
 func (b *BugFixes) Error() string {
+	if b.Err == nil {
+		return b.Bug
+	}
 	return fmt.Sprintf("%s: %s", b.Bug, b.Err.Error())
 }
 
@@ -49,7 +52,7 @@ func (b *BugFixes) Errorf(format string, inputs ...interface{}) error {
 		b.DoReporting()
 	}
 
-	return fmt.Errorf(format, inputs...)
+	return b.FormattedError
 }
 
 // </editor-fold>
@@ -83,7 +86,7 @@ func (b *BugFixes) Infof(format string, inputs ...interface{}) string {
 		b.DoReporting()
 	}
 
-	return fmt.Sprintf("Info: %s", fmt.Sprintf(format, inputs...))
+	return fmt.Sprintf("Info: %s", b.FormattedLog)
 }
 
 // </editor-fold>
@@ -119,7 +122,7 @@ func (b *BugFixes) Debugf(format string, inputs ...interface{}) string {
 		b.DoReporting()
 	}
 
-	return fmt.Sprintf("Debug: %s", fmt.Sprintf(format, inputs...))
+	return fmt.Sprintf("Debug: %s", b.FormattedLog)
 }
 
 // </editor-fold>
@@ -153,7 +156,7 @@ func (b *BugFixes) Logf(format string, inputs ...interface{}) string {
 		b.DoReporting()
 	}
 
-	return fmt.Sprintf("Log: %s", fmt.Sprintf(format, inputs...))
+	return fmt.Sprintf("Log: %s", b.FormattedLog)
 }
 
 // </editor-fold>
@@ -188,7 +191,7 @@ func (b *BugFixes) Warnf(format string, inputs ...interface{}) string {
 		b.DoReporting()
 	}
 
-	return fmt.Sprintf("Warn: %s", fmt.Sprintf(format, inputs...))
+	return fmt.Sprintf("Warn: %s", b.FormattedLog)
 }
 
 // </editor-fold>
@@ -199,7 +202,7 @@ func Fatal(inputs ...interface{}) {
 	Fatalf(format, inputs...)
 }
 func (b *BugFixes) Fatal(inputs ...interface{}) {
-	format := strings.Repeat("%v ", len(inputs))
+	format := strings.Repeat("%v, ", len(inputs))
 	format = strings.TrimRight(format, ", ")
 	b.Fatalf(format, inputs...)
 }

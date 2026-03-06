@@ -146,7 +146,7 @@ func (b *BugFixes) DoReporting() {
 	}
 
 	skipDepthOverride := defaultSkipDepth
-	for {
+	for skipDepthOverride <= 20 {
 		if notDeepEnough := strings.Contains(b.File, "logs/logs.go"); notDeepEnough {
 			skipDepthOverride++
 			b.skipDepth(skipDepthOverride)
@@ -261,7 +261,7 @@ func (b *BugFixes) makePretty() {
 	case "warn":
 		cW(out, true, bYellow, "Warning:")
 	case "info":
-		cW(out, true, bYellow, "Info:")
+		cW(out, true, bCyan, "Info:")
 
 	case "log":
 		cW(out, true, bGreen, "Log:")

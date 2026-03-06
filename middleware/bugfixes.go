@@ -39,7 +39,7 @@ type contextKey struct {
 }
 
 func (k *contextKey) String() string {
-	return "chi/middleware context value " + k.name
+	return "bugfixes/middleware context value " + k.name
 }
 
 func SendToBugfixes(rvr interface{}, client http.Client) {

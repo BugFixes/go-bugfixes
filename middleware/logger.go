@@ -21,11 +21,14 @@ var (
 )
 
 type Level int
+
 const (
-  Log Level = iota
-  Info
-  Error
-  Fatal
+	Debug Level = 1
+	Log   Level = 2
+	Info  Level = 3
+	Warn  Level = 4
+	Error Level = 5
+	Fatal Level = 6
 )
 
 type LoggerSystem struct {
