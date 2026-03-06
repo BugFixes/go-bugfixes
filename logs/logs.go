@@ -85,33 +85,61 @@ func (b *BugFixes) Errorf(format string, inputs ...interface{}) error {
 }
 
 // Info / Infof
-func Info(inputs ...interface{}) string  { return Infof(variadicFormat(inputs), inputs...) }
-func (b *BugFixes) Info(inputs ...interface{}) string { return b.Infof(variadicFormat(inputs), inputs...) }
-func Infof(format string, inputs ...interface{}) string { return (&BugFixes{LocalOnly: false}).Infof(format, inputs...) }
-func (b *BugFixes) Infof(format string, inputs ...interface{}) string { return b.logAt("info", format, inputs...) }
+func Info(inputs ...interface{}) string { return Infof(variadicFormat(inputs), inputs...) }
+func (b *BugFixes) Info(inputs ...interface{}) string {
+	return b.Infof(variadicFormat(inputs), inputs...)
+}
+func Infof(format string, inputs ...interface{}) string {
+	return (&BugFixes{LocalOnly: false}).Infof(format, inputs...)
+}
+func (b *BugFixes) Infof(format string, inputs ...interface{}) string {
+	return b.logAt("info", format, inputs...)
+}
 
 // Debug / Debugf
-func Debug(inputs ...interface{}) string  { return Debugf(variadicFormat(inputs), inputs...) }
-func (b *BugFixes) Debug(inputs ...interface{}) string { return b.Debugf(variadicFormat(inputs), inputs...) }
-func Debugf(format string, inputs ...interface{}) string { return (&BugFixes{LocalOnly: false}).Debugf(format, inputs...) }
-func (b *BugFixes) Debugf(format string, inputs ...interface{}) string { return b.logAt("debug", format, inputs...) }
+func Debug(inputs ...interface{}) string { return Debugf(variadicFormat(inputs), inputs...) }
+func (b *BugFixes) Debug(inputs ...interface{}) string {
+	return b.Debugf(variadicFormat(inputs), inputs...)
+}
+func Debugf(format string, inputs ...interface{}) string {
+	return (&BugFixes{LocalOnly: false}).Debugf(format, inputs...)
+}
+func (b *BugFixes) Debugf(format string, inputs ...interface{}) string {
+	return b.logAt("debug", format, inputs...)
+}
 
 // Log / Logf
-func Log(inputs ...interface{}) string  { return Logf(variadicFormat(inputs), inputs...) }
-func (b *BugFixes) Log(inputs ...interface{}) string { return b.Logf(variadicFormat(inputs), inputs...) }
-func Logf(format string, inputs ...interface{}) string { return (&BugFixes{LocalOnly: false}).Logf(format, inputs...) }
-func (b *BugFixes) Logf(format string, inputs ...interface{}) string { return b.logAt("log", format, inputs...) }
+func Log(inputs ...interface{}) string { return Logf(variadicFormat(inputs), inputs...) }
+func (b *BugFixes) Log(inputs ...interface{}) string {
+	return b.Logf(variadicFormat(inputs), inputs...)
+}
+func Logf(format string, inputs ...interface{}) string {
+	return (&BugFixes{LocalOnly: false}).Logf(format, inputs...)
+}
+func (b *BugFixes) Logf(format string, inputs ...interface{}) string {
+	return b.logAt("log", format, inputs...)
+}
 
 // Warn / Warnf
-func Warn(inputs ...interface{}) string  { return Warnf(variadicFormat(inputs), inputs...) }
-func (b *BugFixes) Warn(inputs ...interface{}) string { return b.Warnf(variadicFormat(inputs), inputs...) }
-func Warnf(format string, inputs ...interface{}) string { return (&BugFixes{LocalOnly: false}).Warnf(format, inputs...) }
-func (b *BugFixes) Warnf(format string, inputs ...interface{}) string { return b.logAt("warn", format, inputs...) }
+func Warn(inputs ...interface{}) string { return Warnf(variadicFormat(inputs), inputs...) }
+func (b *BugFixes) Warn(inputs ...interface{}) string {
+	return b.Warnf(variadicFormat(inputs), inputs...)
+}
+func Warnf(format string, inputs ...interface{}) string {
+	return (&BugFixes{LocalOnly: false}).Warnf(format, inputs...)
+}
+func (b *BugFixes) Warnf(format string, inputs ...interface{}) string {
+	return b.logAt("warn", format, inputs...)
+}
 
 // Fatal / Fatalf — always captures stack, panics.
-func Fatal(inputs ...interface{})            { Fatalf(variadicFormat(inputs), inputs...) }
-func (b *BugFixes) Fatal(inputs ...interface{}) { b.Fatalf(variadicFormat(inputs), inputs...) }
-func Fatalf(format string, inputs ...interface{}) { (&BugFixes{LocalOnly: false}).Fatalf(format, inputs...) }
+func Fatal(inputs ...interface{}) { Fatalf(variadicFormat(inputs), inputs...) }
+func (b *BugFixes) Fatal(inputs ...interface{}) {
+	b.Fatalf(variadicFormat(inputs), inputs...)
+}
+func Fatalf(format string, inputs ...interface{}) {
+	(&BugFixes{LocalOnly: false}).Fatalf(format, inputs...)
+}
 
 func (b *BugFixes) Fatalf(format string, inputs ...interface{}) {
 	if b == nil {

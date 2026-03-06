@@ -134,8 +134,11 @@ type mockFlushHijacker struct {
 	hijacked bool
 }
 
-func (m *mockFlushHijacker) Flush()                                        { m.flushed = true }
-func (m *mockFlushHijacker) Hijack() (net.Conn, *bufio.ReadWriter, error) { m.hijacked = true; return nil, nil, nil }
+func (m *mockFlushHijacker) Flush() { m.flushed = true }
+func (m *mockFlushHijacker) Hijack() (net.Conn, *bufio.ReadWriter, error) {
+	m.hijacked = true
+	return nil, nil, nil
+}
 
 func TestFlushHijackWriter(t *testing.T) {
 	rr := httptest.NewRecorder()
@@ -162,9 +165,14 @@ type mockFancyWriter struct {
 	hijacked bool
 }
 
-func (m *mockFancyWriter) Flush()                                        { m.flushed = true }
-func (m *mockFancyWriter) Hijack() (net.Conn, *bufio.ReadWriter, error) { m.hijacked = true; return nil, nil, nil }
-func (m *mockFancyWriter) ReadFrom(r io.Reader) (int64, error)          { return io.Copy(m.ResponseWriter, r) }
+func (m *mockFancyWriter) Flush() { m.flushed = true }
+func (m *mockFancyWriter) Hijack() (net.Conn, *bufio.ReadWriter, error) {
+	m.hijacked = true
+	return nil, nil, nil
+}
+func (m *mockFancyWriter) ReadFrom(r io.Reader) (int64, error) {
+	return io.Copy(m.ResponseWriter, r)
+}
 
 func TestHTTPFancyWriter(t *testing.T) {
 	rr := httptest.NewRecorder()
@@ -273,5 +281,5 @@ type plainWriter struct {
 }
 
 func (p *plainWriter) Header() http.Header         { return p.ResponseWriter.Header() }
-func (p *plainWriter) Write(b []byte) (int, error)  { return p.ResponseWriter.Write(b) }
-func (p *plainWriter) WriteHeader(s int)            { p.ResponseWriter.WriteHeader(s) }
+func (p *plainWriter) Write(b []byte) (int, error) { return p.ResponseWriter.Write(b) }
+func (p *plainWriter) WriteHeader(s int)           { p.ResponseWriter.WriteHeader(s) }
