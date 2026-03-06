@@ -27,10 +27,8 @@ func LoadConfigFromEnv() Config {
 	localOnlyStr := strings.TrimSpace(os.Getenv("BUGFIXES_LOCAL_ONLY"))
 	localOnly, err := strconv.ParseBool(localOnlyStr)
 	if err != nil && localOnlyStr != "" {
-		_, err := fmt.Fprintf(os.Stderr, "bugfixes: invalid BUGFIXES_LOCAL_ONLY value %q, defaulting to false\n", localOnlyStr)
-		if err != nil {
-			return Config{}
-		}
+		_, _ = fmt.Fprintf(os.Stderr, "bugfixes: invalid BUGFIXES_LOCAL_ONLY value %q, defaulting to false\n", localOnlyStr)
+
 	}
 
 	return Config{
