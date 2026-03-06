@@ -190,7 +190,7 @@ func (f *httpFancyWriter) ReadFrom(r io.Reader) (int64, error) {
 	rf := f.basicWriter.ResponseWriter.(io.ReaderFrom)
 	f.basicWriter.maybeWriteHeader()
 	n, err := rf.ReadFrom(r)
-	f.basicWriter.bytes += int(n)
+	f.basicWriter.bytes += n
 	return n, err
 }
 

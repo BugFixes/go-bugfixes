@@ -2,14 +2,17 @@ package middleware_test
 
 import (
 	"fmt"
-	"github.com/bugfixes/go-bugfixes/middleware"
-	"github.com/jarcoal/httpmock"
-	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
 	"os"
 	"testing"
 	"time"
+
+	bugfixes "github.com/bugfixes/go-bugfixes"
+	"github.com/bugfixes/go-bugfixes/middleware"
+	"github.com/jarcoal/httpmock"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestBugfixes(t *testing.T) {
@@ -54,6 +57,7 @@ func TestParseBugLine(t *testing.T) {
 }
 
 func TestSendToBugfixes(t *testing.T) {
+	t.Cleanup(bugfixes.ResetDefaultConfig)
 	if err := os.Setenv("BUGFIXES_AGENT_KEY", "test_key"); err != nil {
 		t.Fatalf("Could not set environment variable: %v", err)
 	}
@@ -64,20 +68,13 @@ func TestSendToBugfixes(t *testing.T) {
 	httpmock.Activate()
 	defer httpmock.DeactivateAndReset()
 
-	// Mock the POST request
+	calls := 0
 	httpmock.RegisterResponder("POST", "https://api.bugfix.es/v1/bug",
 		func(req *http.Request) (*http.Response, error) {
-			// Ensure the request body matches what you expect
-			expectedBody := `{"example":"data"}`
-			body, err := ioutil.ReadAll(req.Body)
-			if err != nil {
-				return httpmock.NewStringResponse(500, ""), err
-			}
-			if string(body) != expectedBody {
-				return httpmock.NewStringResponse(400, "Bad Request"), nil
-			}
-
-			// Return a mocked response
+			calls++
+			assert.Equal(t, "test_key", req.Header.Get("X-API-KEY"))
+			assert.Equal(t, "test_secret", req.Header.Get("X-API-SECRET"))
+			assert.Equal(t, "application/json", req.Header.Get("Content-Type"))
 			return httpmock.NewStringResponse(200, `{"status":"success"}`), nil
 		},
 	)
@@ -87,4 +84,5 @@ func TestSendToBugfixes(t *testing.T) {
 	}
 
 	middleware.SendToBugfixes(nil, client)
+	require.Equal(t, 1, calls)
 }
