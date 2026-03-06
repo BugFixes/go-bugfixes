@@ -106,14 +106,10 @@ func (s *System) SendToBugfixes(rvr interface{}, client http.Client) {
 		}
 		return
 	}
-	if err := resp.Body.Close(); err != nil {
-		if _, errs := fmt.Fprintf(out, "bugfixes: failed to close body: %v", err); errs != nil {
-			log.Fatal(errs)
+	if resp != nil && resp.Body != nil {
+		if err := resp.Body.Close(); err != nil {
+			fmt.Fprintf(os.Stderr, "bugfixes: failed to close body: %v\n", err)
 		}
-		if _, errs := os.Stderr.Write(out.Bytes()); errs != nil {
-			log.Fatal(errs)
-		}
-		return
 	}
 }
 

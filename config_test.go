@@ -36,6 +36,20 @@ func TestConfigMerge(t *testing.T) {
 	}
 }
 
+func TestConfigMerge_ResetLocalOnly(t *testing.T) {
+	base := bugfixes.Config{
+		LocalOnly: true,
+	}
+
+	merged := base.Merge(bugfixes.Config{
+		LocalOnly: false,
+	})
+
+	if merged.LocalOnly {
+		t.Fatal("expected LocalOnly to be reset to false by override")
+	}
+}
+
 func TestSetDefaultConfig(t *testing.T) {
 	t.Cleanup(bugfixes.ResetDefaultConfig)
 

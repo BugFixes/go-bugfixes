@@ -34,9 +34,9 @@ func (s prettyStack) parse(debugStack []byte, rvr interface{}) ([]byte, error) {
 	buf := &bytes.Buffer{}
 
 	cW(buf, false, bRed, "\n")
-//	cW(buf, true, bCyan, " panic: ")
-//	cW(buf, true, bBlue, "%v", rvr)
-//	cW(buf, false, bWhite, "\n \n")
+	cW(buf, true, bCyan, " panic: ")
+	cW(buf, true, bBlue, "%v", rvr)
+	cW(buf, false, bWhite, "\n \n")
 
 	// process debug stack info
 	stack := strings.Split(string(debugStack), "\n")
@@ -96,20 +96,26 @@ func (s prettyStack) decorateFuncCallLine(line string, useColor bool, num int) (
 
 	buf := &bytes.Buffer{}
 	pkg := line[0:idx]
-	// addr := line[idx:]
 	method := ""
 
 	idx = strings.LastIndex(pkg, string(os.PathSeparator))
 	if idx < 0 {
 		idx = strings.Index(pkg, ".")
-		method = pkg[idx:]
-		pkg = pkg[0:idx]
+		if idx < 0 {
+			method = pkg
+			pkg = ""
+		} else {
+			method = pkg[idx:]
+			pkg = pkg[0:idx]
+		}
 	} else {
 		method = pkg[idx+1:]
 		pkg = pkg[0 : idx+1]
 		idx = strings.Index(method, ".")
-		pkg += method[0:idx]
-		method = method[idx:]
+		if idx >= 0 {
+			pkg += method[0:idx]
+			method = method[idx:]
+		}
 	}
 	pkgColor := nYellow
 	methodColor := bGreen
@@ -123,7 +129,6 @@ func (s prettyStack) decorateFuncCallLine(line string, useColor bool, num int) (
 	}
 	cW(buf, useColor, pkgColor, "%s", pkg)
 	cW(buf, useColor, methodColor, "%s\n", method)
-	// cW(buf, useColor, nBlack, "%s", addr)
 	return buf.String(), nil
 }
 
