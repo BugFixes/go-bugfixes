@@ -96,7 +96,7 @@ func TestRecoverer_ErrAbortHandler_SilentlyIgnored(t *testing.T) {
 	req := httptest.NewRequest(http.MethodGet, "/", nil)
 	rr := httptest.NewRecorder()
 
-	// ErrAbortHandler is recovered but silently ignored — no 500 written
+	// Current implementation ignores ErrAbortHandler and leaves the response untouched.
 	assert.NotPanics(t, func() {
 		handler.ServeHTTP(rr, req)
 	})

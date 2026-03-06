@@ -48,7 +48,7 @@ type WrapResponseWriter interface {
 	// yet been sent.
 	Status() int
 	// BytesWritten returns the total number of bytes sent to the client.
-	BytesWritten() int
+	BytesWritten() int64
 	// Tee causes the response body to be written to the given io.Writer in
 	// addition to proxying the writes through. Only one io.Writer can be
 	// tee'd to at once: setting a second one will overwrite the first.
@@ -66,7 +66,7 @@ type basicWriter struct {
 	http.ResponseWriter
 	wroteHeader bool
 	code        int
-	bytes       int
+	bytes       int64
 	tee         io.Writer
 }
 
@@ -88,7 +88,7 @@ func (b *basicWriter) Write(buf []byte) (int, error) {
 			err = err2
 		}
 	}
-	b.bytes += n
+	b.bytes += int64(n)
 	return n, err
 }
 
@@ -102,7 +102,7 @@ func (b *basicWriter) Status() int {
 	return b.code
 }
 
-func (b *basicWriter) BytesWritten() int {
+func (b *basicWriter) BytesWritten() int64 {
 	return b.bytes
 }
 
@@ -184,13 +184,12 @@ func (f *http2FancyWriter) Push(target string, opts *http.PushOptions) error {
 func (f *httpFancyWriter) ReadFrom(r io.Reader) (int64, error) {
 	if f.basicWriter.tee != nil {
 		n, err := io.Copy(&f.basicWriter, r)
-		f.basicWriter.bytes += int(n)
 		return n, err
 	}
 	rf := f.basicWriter.ResponseWriter.(io.ReaderFrom)
 	f.basicWriter.maybeWriteHeader()
 	n, err := rf.ReadFrom(r)
-	f.basicWriter.bytes += int(n)
+	f.basicWriter.bytes += n
 	return n, err
 }
 

@@ -1,6 +1,7 @@
 package middleware_test
 
 import (
+	"context"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -175,6 +176,6 @@ func TestRequestID_UniquePerRequest(t *testing.T) {
 }
 
 func TestGetReqID_NilContext(t *testing.T) {
-	id := middleware.GetReqID(nil)
+	id := middleware.GetReqID(context.Background())
 	assert.Empty(t, id)
 }

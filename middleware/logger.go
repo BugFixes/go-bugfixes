@@ -21,21 +21,24 @@ var (
 )
 
 type Level int
+
 const (
-  Log Level = iota
-  Info
-  Error
-  Fatal
+	Debug Level = 1
+	Log   Level = 2
+	Info  Level = 3
+	Warn  Level = 4
+	Error Level = 5
+	Fatal Level = 6
 )
 
 type LoggerSystem struct {
-  LogLevel Level
+	LogLevel Level
 }
 
 func SetupLogger(logLevel Level) *LoggerSystem {
-  return &LoggerSystem{
-    LogLevel: logLevel,
-  }
+	return &LoggerSystem{
+		LogLevel: logLevel,
+	}
 }
 
 // Logger is a middleware that logs the start and end of each request, along
@@ -61,13 +64,13 @@ func Logger(next http.Handler) http.Handler {
 }
 
 func (s *LoggerSystem) Logger(next http.Handler) http.Handler {
-  l := RequestLogger(&DefaultLogFormatter{
-    Logger: log.New(os.Stdout, "", log.LstdFlags),
-    NoColor: false,
-    LogLevel: s.LogLevel,
-  })
+	l := RequestLogger(&DefaultLogFormatter{
+		Logger:   log.New(os.Stdout, "", log.LstdFlags),
+		NoColor:  false,
+		LogLevel: s.LogLevel,
+	})
 
-  return l(next)
+	return l(next)
 }
 
 // RequestLogger returns a logger handler using a custom LogFormatter.
@@ -91,13 +94,13 @@ func RequestLogger(f LogFormatter) func(next http.Handler) http.Handler {
 // LogFormatter initiates the beginning of a new LogEntry per request.
 // See DefaultLogFormatter for an example implementation.
 type LogFormatter interface {
-  NewLogEntry(r *http.Request) LogEntry
+	NewLogEntry(r *http.Request) LogEntry
 }
 
 // LogEntry records the final log when a request completes.
 // See defaultLogEntry for an example implementation.
 type LogEntry interface {
-	Write(status, bytes int, elapsed time.Duration)
+	Write(status int, bytes int64, elapsed time.Duration)
 	Panic(v interface{})
 }
 
@@ -120,9 +123,9 @@ type LoggerInterface interface {
 
 // DefaultLogFormatter is a simple logger that implements a LogFormatter.
 type DefaultLogFormatter struct {
-	Logger  LoggerInterface
-	NoColor bool
-  LogLevel Level
+	Logger   LoggerInterface
+	NoColor  bool
+	LogLevel Level
 }
 
 // NewLogEntry creates a new LogEntry for the request.
@@ -162,7 +165,7 @@ type defaultLogEntry struct {
 	useColor bool
 }
 
-func (l *defaultLogEntry) Write(status, bytes int, elapsed time.Duration) {
+func (l *defaultLogEntry) Write(status int, bytes int64, elapsed time.Duration) {
 	switch {
 	case status < 200:
 		cW(l.buf, l.useColor, bBlue, "%03d", status)
@@ -179,11 +182,12 @@ func (l *defaultLogEntry) Write(status, bytes int, elapsed time.Duration) {
 	cW(l.buf, l.useColor, bBlue, " %dB", bytes)
 
 	l.buf.WriteString(" in ")
-	if elapsed < 500*time.Millisecond {
+	switch {
+	case elapsed < 500*time.Millisecond:
 		cW(l.buf, l.useColor, nGreen, "%s", elapsed)
-	} else if elapsed < 5*time.Second {
+	case elapsed < 5*time.Second:
 		cW(l.buf, l.useColor, nYellow, "%s", elapsed)
-	} else {
+	default:
 		cW(l.buf, l.useColor, nRed, "%s", elapsed)
 	}
 

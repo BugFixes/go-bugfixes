@@ -2,10 +2,11 @@ package middleware_test
 
 import (
 	"context"
-	"github.com/bugfixes/go-bugfixes/middleware"
 	"net/http"
 	"net/http/httptest"
 	"testing"
+
+	"github.com/bugfixes/go-bugfixes/middleware"
 )
 
 func TestRequestID(t *testing.T) {

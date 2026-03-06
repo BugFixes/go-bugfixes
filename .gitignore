@@ -1,2 +1,5 @@
 !logs
 coverage.txt
+.cache/
+bin/
+.fleet/

@@ -1,6 +1,6 @@
 module github.com/bugfixes/go-bugfixes
 
-go 1.21
+go 1.26.1
 
 require (
 	github.com/go-logfmt/logfmt v0.6.1

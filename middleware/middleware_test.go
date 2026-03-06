@@ -1,10 +1,11 @@
 package middleware_test
 
 import (
-	"github.com/bugfixes/go-bugfixes/middleware"
 	"net/http"
 	"net/http/httptest"
 	"testing"
+
+	"github.com/bugfixes/go-bugfixes/middleware"
 )
 
 func TestBugFixes(t *testing.T) {

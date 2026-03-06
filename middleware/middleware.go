@@ -2,12 +2,15 @@ package middleware
 
 import (
 	"net/http"
+
+	bugfixes "github.com/bugfixes/go-bugfixes"
 )
 
 type System struct {
 	// Bugfixes
 	AgentID string
 	Secret  string
+	Config  *bugfixes.Config
 
 	// Middlewares to use
 	Middlewares []func(handler http.Handler) http.Handler
@@ -27,8 +30,12 @@ func (s *System) SetupBugfixes(id, secret string) {
 	s.Secret = secret
 }
 
-func (s *System) AddMiddleware(middlwares ...func(handler http.Handler) http.Handler) {
-	s.Middlewares = append(s.Middlewares, middlwares...)
+func (s *System) SetConfig(cfg bugfixes.Config) {
+	s.Config = &cfg
+}
+
+func (s *System) AddMiddleware(middlewares ...func(handler http.Handler) http.Handler) {
+	s.Middlewares = append(s.Middlewares, middlewares...)
 }
 
 func (s *System) Handler(h http.Handler) http.Handler {
@@ -44,12 +51,10 @@ func (s *System) Handler(h http.Handler) http.Handler {
 }
 
 func DefaultMiddleware(next http.Handler) http.Handler {
-	s := NewDefaultMiddleware(next)
-
-	return s.Handler(next)
+	return NewDefaultMiddleware().Handler(next)
 }
 
-func NewDefaultMiddleware(next http.Handler) *System {
+func NewDefaultMiddleware() *System {
 	s := NewMiddleware()
 	s.AddMiddleware(Logger)
 	s.AddMiddleware(RequestID)

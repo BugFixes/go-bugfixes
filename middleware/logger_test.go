@@ -56,18 +56,18 @@ func TestStatusLevel_Mapping(t *testing.T) {
 		status    int
 		shouldLog bool
 	}{
-		// Log level (0) — logs everything
+		// Log level (2) — logs everything
 		{"Log level sees 200", middleware.Log, 200, true},
 		{"Log level sees 404", middleware.Log, 404, true},
 		{"Log level sees 500", middleware.Log, 500, true},
 
-		// Info level (1) — logs everything (all statuses map to Info+)
+		// Info level (3) — logs everything (all statuses map to Info+)
 		{"Info level sees 200", middleware.Info, 200, true},
 		{"Info level sees 301", middleware.Info, 301, true},
 		{"Info level sees 404", middleware.Info, 404, true},
 		{"Info level sees 500", middleware.Info, 500, true},
 
-		// Error level (2) — only 4xx and 5xx
+		// Error level (5) — only 4xx and 5xx
 		{"Error level skips 200", middleware.Error, 200, false},
 		{"Error level skips 201", middleware.Error, 201, false},
 		{"Error level skips 301", middleware.Error, 301, false},
@@ -76,7 +76,7 @@ func TestStatusLevel_Mapping(t *testing.T) {
 		{"Error level sees 500", middleware.Error, 500, true},
 		{"Error level sees 503", middleware.Error, 503, true},
 
-		// Fatal level (3) — only 5xx
+		// Fatal level (6) — only 5xx
 		{"Fatal level skips 200", middleware.Fatal, 200, false},
 		{"Fatal level skips 404", middleware.Fatal, 404, false},
 		{"Fatal level skips 499", middleware.Fatal, 499, false},

@@ -71,7 +71,7 @@ func Test_Info(t *testing.T) {
 		{
 			name:   "simple",
 			inputs: errors.New("simple"),
-			expect: fmt.Sprint("Info: simple"),
+			expect: "Info: simple",
 		},
 	}
 
@@ -95,7 +95,7 @@ func Test_Debug(t *testing.T) {
 		{
 			name:   "simple",
 			inputs: errors.New("simple"),
-			expect: fmt.Sprint("Debug: simple"),
+			expect: "Debug: simple",
 		},
 	}
 
@@ -119,7 +119,7 @@ func Test_Log(t *testing.T) {
 		{
 			name:   "simple",
 			inputs: errors.New("simple"),
-			expect: fmt.Sprint("Log: simple"),
+			expect: "Log: simple",
 		},
 	}
 
@@ -143,7 +143,7 @@ func Test_Warn(t *testing.T) {
 		{
 			name:   "simple",
 			inputs: errors.New("simple"),
-			expect: fmt.Sprint("Warn: simple"),
+			expect: "Warn: simple",
 		},
 	}
 

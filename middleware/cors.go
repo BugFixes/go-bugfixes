@@ -1,8 +1,8 @@
 package middleware
 
 import (
-  "net/http"
-  "strings"
+	"net/http"
+	"strings"
 )
 
 // Origins
@@ -15,12 +15,13 @@ func (s *System) AddAllowedHeaders(headers ...string) {
 	s.AllowedHeaders = append(s.AllowedHeaders, headers...)
 }
 func (s *System) getAllowedHeaders() string {
-	standardAllowed := []string {
+	standardAllowed := []string{
 		"Accept",
 		"Content-Type",
 	}
-	
-	allowedHeaders := append(standardAllowed, s.AllowedHeaders...)
+
+	allowedHeaders := append([]string{}, standardAllowed...)
+	allowedHeaders = append(allowedHeaders, s.AllowedHeaders...)
 	return strings.Join(allowedHeaders, ", ")
 }
 
@@ -33,15 +34,14 @@ func (s *System) getAllowedMethods() string {
 }
 
 func (s *System) wildcardEnabled() bool {
-  for _, origin := range s.AllowedOrigins {
-    if origin == "*" {
-      return true
-    }
-  }
+	for _, origin := range s.AllowedOrigins {
+		if origin == "*" {
+			return true
+		}
+	}
 
-  return false
+	return false
 }
-
 
 func (s *System) CORS(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
