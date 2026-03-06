@@ -314,10 +314,10 @@ func (b *BugFixes) config() bugfixes.Config {
 
 var (
 	// Normal colors
-	//nRed    = []byte{'\033', '[', '3', '1', 'm'}
-	//nGreen  = []byte{'\033', '[', '3', '2', 'm'}
+	// nRed    = []byte{'\033', '[', '3', '1', 'm'}
+	// nGreen  = []byte{'\033', '[', '3', '2', 'm'}
 	nYellow = []byte{'\033', '[', '3', '3', 'm'}
-	//nCyan   = []byte{'\033', '[', '3', '6', 'm'}
+	// nCyan   = []byte{'\033', '[', '3', '6', 'm'}
 	// Bright colors
 	bRed     = []byte{'\033', '[', '3', '1', ';', '1', 'm'}
 	bGreen   = []byte{'\033', '[', '3', '2', ';', '1', 'm'}

@@ -75,16 +75,15 @@ func (s prettyStack) parse(debugStack []byte, rvr interface{}) ([]byte, error) {
 
 func (s prettyStack) decorateLine(line string, useColor bool, num int) (string, error) {
 	line = strings.TrimSpace(line)
-	if strings.HasPrefix(line, "\t") || strings.Contains(line, ".go:") {
+	switch {
+	case strings.HasPrefix(line, "\t") || strings.Contains(line, ".go:"):
 		return s.decorateSourceLine(line, useColor, num)
-	} else if strings.HasSuffix(line, ")") {
+	case strings.HasSuffix(line, ")"):
 		return s.decorateFuncCallLine(line, useColor, num)
-	} else {
-		if strings.HasPrefix(line, "\t") {
-			return strings.Replace(line, "\t", "      ", 1), nil
-		} else {
-			return fmt.Sprintf("    %s\n", line), nil
-		}
+	case strings.HasPrefix(line, "\t"):
+		return strings.Replace(line, "\t", "      ", 1), nil
+	default:
+		return fmt.Sprintf("    %s\n", line), nil
 	}
 }
 

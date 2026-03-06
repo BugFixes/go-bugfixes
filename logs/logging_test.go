@@ -3,8 +3,9 @@ package logs_test
 import (
 	"errors"
 	"fmt"
-	"github.com/bugfixes/go-bugfixes/logs"
 	"testing"
+
+	"github.com/bugfixes/go-bugfixes/logs"
 )
 
 func TestUnwrap(t *testing.T) {

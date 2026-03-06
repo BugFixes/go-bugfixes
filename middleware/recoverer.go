@@ -179,21 +179,20 @@ func (s prettyStack) bugParse(debugStack []byte, rvr interface{}) (BugFixesSend,
 }
 
 func flatten(lines []string, seperator string) string {
-	return strings.Join(lines[:], seperator)
+	return strings.Join(lines, seperator)
 }
 
 func (s prettyStack) decorateLine(line string, useColor bool, num int) (string, error) {
 	line = strings.TrimSpace(line)
-	if strings.HasPrefix(line, "\t") || strings.Contains(line, ".go:") {
+	switch {
+	case strings.HasPrefix(line, "\t") || strings.Contains(line, ".go:"):
 		return s.decorateSourceLine(line, useColor, num)
-	} else if strings.HasSuffix(line, ")") {
+	case strings.HasSuffix(line, ")"):
 		return s.decorateFuncCallLine(line, useColor, num)
-	} else {
-		if strings.HasPrefix(line, "\t") {
-			return strings.Replace(line, "\t", "      ", 1), nil
-		} else {
-			return fmt.Sprintf("    %s\n", line), nil
-		}
+	case strings.HasPrefix(line, "\t"):
+		return strings.Replace(line, "\t", "      ", 1), nil
+	default:
+		return fmt.Sprintf("    %s\n", line), nil
 	}
 }
 
@@ -219,7 +218,7 @@ func (s prettyStack) decorateFuncCallLine(line string, useColor bool, num int) (
 		}
 	} else {
 		method = pkg[idx+1:]
-		pkg = pkg[0:idx+1]
+		pkg = pkg[0 : idx+1]
 		idx = strings.Index(method, ".")
 		if idx >= 0 {
 			pkg += method[0:idx]
@@ -248,11 +247,11 @@ func (s prettyStack) decorateSourceLine(line string, useColor bool, num int) (st
 	}
 
 	buf := &bytes.Buffer{}
-	path := line[0:idx+3]
+	path := line[0 : idx+3]
 	lineno := line[idx+3:]
 
 	idx = strings.LastIndex(path, string(os.PathSeparator))
-	dir := path[0:idx+1]
+	dir := path[0 : idx+1]
 	file := path[idx+1:]
 
 	idx = strings.Index(lineno, " ")

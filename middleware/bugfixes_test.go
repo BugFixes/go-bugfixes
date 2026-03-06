@@ -29,6 +29,11 @@ func TestBugfixes(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Could not send GET request: %v", err)
 	}
+	defer func() {
+		if closeErr := resp.Body.Close(); closeErr != nil {
+			t.Fatalf("Could not close response body: %v", closeErr)
+		}
+	}()
 
 	if resp.StatusCode != 200 {
 		t.Fatalf("Expected status code 200, got %v", resp.StatusCode)
