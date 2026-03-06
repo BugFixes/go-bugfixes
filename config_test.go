@@ -36,7 +36,7 @@ func TestConfigMerge(t *testing.T) {
 	}
 }
 
-func TestConfigMerge_ResetLocalOnly(t *testing.T) {
+func TestConfigMerge_LocalOnlyCannotBeReset(t *testing.T) {
 	base := bugfixes.Config{
 		LocalOnly: true,
 	}
@@ -45,8 +45,8 @@ func TestConfigMerge_ResetLocalOnly(t *testing.T) {
 		LocalOnly: false,
 	})
 
-	if merged.LocalOnly {
-		t.Fatal("expected LocalOnly to be reset to false by override")
+	if !merged.LocalOnly {
+		t.Fatal("expected LocalOnly to remain true — override should not downgrade it")
 	}
 }
 
