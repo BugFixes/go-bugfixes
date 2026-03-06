@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"os"
+	"sync/atomic"
 	"testing"
 	"time"
 
@@ -21,9 +22,8 @@ func TestBugfixes(t *testing.T) {
 			t.Fatalf("Could not write to response writer: %v", errs)
 		}
 	})
-	handler := middleware.BugFixes(handlerFunc)
-	testHandler := handler(handlerFunc)
-	server := httptest.NewServer(handler(testHandler))
+	handler := middleware.BugFixes()
+	server := httptest.NewServer(handler(handlerFunc))
 	resp, err := http.Get(server.URL)
 
 	if err != nil {
@@ -73,10 +73,10 @@ func TestSendToBugfixes(t *testing.T) {
 	httpmock.Activate()
 	defer httpmock.DeactivateAndReset()
 
-	calls := 0
+	var calls atomic.Int32
 	httpmock.RegisterResponder("POST", "https://api.bugfix.es/v1/bug",
 		func(req *http.Request) (*http.Response, error) {
-			calls++
+			calls.Add(1)
 			assert.Equal(t, "test_key", req.Header.Get("X-API-KEY"))
 			assert.Equal(t, "test_secret", req.Header.Get("X-API-SECRET"))
 			assert.Equal(t, "application/json", req.Header.Get("Content-Type"))
@@ -84,10 +84,10 @@ func TestSendToBugfixes(t *testing.T) {
 		},
 	)
 
-	client := http.Client{
-		Timeout: 10 * time.Second,
-	}
+	middleware.SendToBugfixes(nil)
 
-	middleware.SendToBugfixes(nil, client)
-	require.Equal(t, 1, calls)
+	// SendToBugfixes is async; wait for it to complete
+	require.Eventually(t, func() bool {
+		return calls.Load() == 1
+	}, 5*time.Second, 10*time.Millisecond)
 }

@@ -2,9 +2,9 @@ package middleware
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
-	"log"
 	"net/http"
 	"os"
 	"runtime/debug"
@@ -25,7 +25,7 @@ type BugFixesSend struct {
 }
 
 // BugFixes will create a new middleware handler from a http.Handler.
-func BugFixes(h http.Handler) func(next http.Handler) http.Handler {
+func BugFixes() func(next http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			next.ServeHTTP(w, r)
@@ -44,7 +44,7 @@ func (k *contextKey) String() string {
 	return "bugfixes/middleware context value " + k.name
 }
 
-func SendToBugfixes(rvr interface{}, client http.Client) {
+func SendToBugfixes(rvr interface{}) {
 	cfg := bugfixes.GetDefaultConfig()
 	if cfg.AgentKey == "" || cfg.AgentSecret == "" {
 		return
@@ -53,57 +53,45 @@ func SendToBugfixes(rvr interface{}, client http.Client) {
 	s := &System{
 		Config: &cfg,
 	}
-	s.SendToBugfixes(rvr, client)
+	s.SendToBugfixes(rvr)
 }
 
-func (s *System) SendToBugfixes(rvr interface{}, client http.Client) {
+func (s *System) SendToBugfixes(rvr interface{}) {
+	go s.sendToBugfixes(rvr)
+}
+
+func (s *System) sendToBugfixes(rvr interface{}) {
 	cfg := s.config()
 	debugStack := debug.Stack()
 	p := prettyStack{}
-	out := &bytes.Buffer{}
 	bug, err := p.bugParse(debugStack, rvr)
 	if err != nil {
-		if _, errs := fmt.Fprintf(out, "bugfixes: failed to parse bug: %v", err); errs != nil {
-			log.Fatal(errs)
-		}
-		if _, errs := os.Stderr.Write(out.Bytes()); errs != nil {
-			log.Fatal(errs)
-		}
+		fmt.Fprintf(os.Stderr, "bugfixes: failed to parse bug: %v\n", err)
 		return
 	}
 
 	body, err := json.Marshal(bug)
 	if err != nil {
-		if _, errs := fmt.Fprintf(out, "bugfixes: failed to marshall bug: %v", err); errs != nil {
-			log.Fatal(errs)
-		}
-		if _, errs := os.Stderr.Write(out.Bytes()); errs != nil {
-			log.Fatal(errs)
-		}
+		fmt.Fprintf(os.Stderr, "bugfixes: failed to marshall bug: %v\n", err)
 		return
 	}
-	request, err := http.NewRequest("POST", cfg.BugEndpoint(), bytes.NewBuffer(body))
+
+	ctx, cancel := context.WithTimeout(context.Background(), bugfixes.DefaultTimeout)
+	defer cancel()
+
+	request, err := http.NewRequestWithContext(ctx, "POST", cfg.BugEndpoint(), bytes.NewBuffer(body))
 	if err != nil {
-		if _, errs := fmt.Fprintf(out, "bugfixes: failed to new request: %v", err); errs != nil {
-			log.Fatal(errs)
-		}
-		if _, errs := os.Stderr.Write(out.Bytes()); errs != nil {
-			log.Fatal(errs)
-		}
+		fmt.Fprintf(os.Stderr, "bugfixes: failed to new request: %v\n", err)
 		return
 	}
 	request.Header.Set("Content-Type", "application/json")
 	request.Header.Set("X-API-KEY", cfg.AgentKey)
 	request.Header.Set("X-API-SECRET", cfg.AgentSecret)
 
+	client := cfg.GetHTTPClient()
 	resp, err := client.Do(request)
 	if err != nil {
-		if _, errs := fmt.Fprintf(out, "bugfixes: failed to send bug: %v", err); errs != nil {
-			log.Fatal(errs)
-		}
-		if _, errs := os.Stderr.Write(out.Bytes()); errs != nil {
-			log.Fatal(errs)
-		}
+		fmt.Fprintf(os.Stderr, "bugfixes: failed to send bug: %v\n", err)
 		return
 	}
 	if resp != nil && resp.Body != nil {

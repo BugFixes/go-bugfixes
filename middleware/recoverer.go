@@ -4,12 +4,10 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
-	"log"
 	"net/http"
 	"os"
 	"runtime/debug"
 	"strings"
-	"time"
 )
 
 // Recoverer is a middleware that recovers from panics, logs the panic (and a
@@ -37,9 +35,7 @@ func (s *System) Recoverer(next http.Handler) http.Handler {
 
 				w.WriteHeader(http.StatusInternalServerError)
 
-				s.SendToBugfixes(rvr, http.Client{
-					Timeout: time.Second * 10,
-				})
+				s.SendToBugfixes(rvr)
 			}
 		}()
 
@@ -52,14 +48,10 @@ func PrintPrettyStack(rvr interface{}) {
 	s := prettyStack{}
 	out, err := s.parse(debugStack, rvr)
 	if err == nil {
-		if _, errs := os.Stderr.Write(out); errs != nil {
-			log.Fatal(errs)
-		}
+		_, _ = os.Stderr.Write(out)
 	} else {
 		// print stdlib output as a fallback
-		if _, errs := os.Stderr.Write(debugStack); errs != nil {
-			log.Fatal(errs)
-		}
+		_, _ = os.Stderr.Write(debugStack)
 	}
 }
 

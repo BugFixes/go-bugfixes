@@ -7,11 +7,15 @@ import (
 
 // Origins
 func (s *System) AddAllowedOrigins(origins ...string) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
 	s.AllowedOrigins = append(s.AllowedOrigins, origins...)
 }
 
 // Headers
 func (s *System) AddAllowedHeaders(headers ...string) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
 	s.AllowedHeaders = append(s.AllowedHeaders, headers...)
 }
 func (s *System) getAllowedHeaders() string {
@@ -27,6 +31,8 @@ func (s *System) getAllowedHeaders() string {
 
 // Methods
 func (s *System) AddAllowedMethods(methods ...string) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
 	s.AllowedMethods = append(s.AllowedMethods, methods...)
 }
 func (s *System) getAllowedMethods() string {
