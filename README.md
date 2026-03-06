@@ -97,9 +97,9 @@ handler := system.Handler(mux)
 Common repo tasks:
 
 ```bash
-make fmt
-make lint
-make test
-make test-race
-make check
+just fmt
+just lint
+just test
+just test-race
+just check
 ```
