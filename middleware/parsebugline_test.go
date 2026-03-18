@@ -26,6 +26,15 @@ func TestParseBugLine_DeepPath(t *testing.T) {
 	assert.Equal(t, 100, line)
 }
 
+func TestParseBugLine_PathWithSpaces(t *testing.T) {
+	file, lne, line, err := middleware.ParseBugLine("/Volumes/Dockcase/AI Stuffs/project/main.go:42 +0x1a")
+
+	require.NoError(t, err)
+	assert.Equal(t, "/Volumes/Dockcase/AI Stuffs/project/main.go", file)
+	assert.Equal(t, "42", lne)
+	assert.Equal(t, 42, line)
+}
+
 func TestParseBugLine_MissingColon_ReturnsError(t *testing.T) {
 	_, _, _, err := middleware.ParseBugLine("main.go 42")
 

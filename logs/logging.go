@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"os"
 	"runtime"
 	"strconv"
 	"strings"
@@ -171,7 +172,7 @@ func (b *BugFixes) DoReporting() {
 
 	body, err := json.Marshal(b)
 	if err != nil {
-		fmt.Printf("bugfixes sendLog marshal: %+v\n", err)
+		_, _ = fmt.Fprintf(os.Stderr, "bugfixes sendLog marshal: %+v\n", err)
 		return
 	}
 	go b.sendLogBody(cfg, body)
@@ -182,23 +183,23 @@ func (b *BugFixes) logFormat() {
 	lf := logfmt.NewEncoder(&out)
 
 	if err := lf.EncodeKeyval("path", b.File); err != nil {
-		fmt.Printf("logfmt path: %v", err)
+		_, _ = fmt.Fprintf(os.Stderr, "logfmt path: %v", err)
 	}
 	if err := lf.EncodeKeyval("level", b.Level); err != nil {
-		fmt.Printf("logfmt level: %v", err)
+		_, _ = fmt.Fprintf(os.Stderr, "logfmt level: %v", err)
 	}
 	if err := lf.EncodeKeyval("msg", b.FormattedLog); err != nil {
-		fmt.Printf("logfmt msg: %v", err)
+		_, _ = fmt.Fprintf(os.Stderr, "logfmt msg: %v", err)
 	}
 	if err := lf.EncodeKeyval("time", time.Now()); err != nil {
-		fmt.Printf("logfmt time: %v", err)
+		_, _ = fmt.Fprintf(os.Stderr, "logfmt time: %v", err)
 	}
 	if err := lf.EncodeKeyval("line", b.Line); err != nil {
-		fmt.Printf("logfmt line: %v", err)
+		_, _ = fmt.Fprintf(os.Stderr, "logfmt line: %v", err)
 	}
 
 	if err := lf.EndRecord(); err != nil {
-		fmt.Printf("logfmt endrecord: %v", err)
+		_, _ = fmt.Fprintf(os.Stderr, "logfmt endrecord: %v", err)
 	}
 
 	b.LogFmt = out.String()
@@ -206,12 +207,12 @@ func (b *BugFixes) logFormat() {
 
 func (b *BugFixes) sendLogBody(cfg bugfixes.Config, body []byte) {
 	if cfg.AgentKey == "" || cfg.AgentSecret == "" {
-		fmt.Printf("cant send to server till you have created an agent and set the keys\n")
+		_, _ = fmt.Fprint(os.Stderr, "cant send to server till you have created an agent and set the keys\n")
 		if cfg.AgentKey == "" {
-			fmt.Printf("env: BUGFIXES_AGENT_KEY missing\n")
+			_, _ = fmt.Fprint(os.Stderr, "env: BUGFIXES_AGENT_KEY missing\n")
 		}
 		if cfg.AgentSecret == "" {
-			fmt.Printf("env: BUGFIXES_AGENT_SECRET missing\n")
+			_, _ = fmt.Fprint(os.Stderr, "env: BUGFIXES_AGENT_SECRET missing\n")
 		}
 		return
 	}
@@ -221,7 +222,7 @@ func (b *BugFixes) sendLogBody(cfg bugfixes.Config, body []byte) {
 
 	request, err := http.NewRequestWithContext(ctx, "POST", cfg.LogEndpoint(), bytes.NewBuffer(body))
 	if err != nil {
-		fmt.Printf("bugfixes sendLog newRequest: %+v\n", err)
+		_, _ = fmt.Fprintf(os.Stderr, "bugfixes sendLog newRequest: %+v\n", err)
 		return
 	}
 	request.Header.Set("Content-Type", "application/json")
@@ -231,12 +232,12 @@ func (b *BugFixes) sendLogBody(cfg bugfixes.Config, body []byte) {
 	client := cfg.GetHTTPClient()
 	resp, err := client.Do(request)
 	if err != nil {
-		fmt.Printf("bugfixes sendLog do: %+v\n", err)
+		_, _ = fmt.Fprintf(os.Stderr, "bugfixes sendLog do: %+v\n", err)
 		return
 	}
 	if resp != nil && resp.Body != nil {
 		if err := resp.Body.Close(); err != nil {
-			fmt.Printf("bugfixes sendLog close: %+v\n", err)
+			_, _ = fmt.Fprintf(os.Stderr, "bugfixes sendLog close: %+v\n", err)
 			return
 		}
 	}
@@ -271,16 +272,26 @@ func (b *BugFixes) makePretty() {
 	// print to stdout if the level is high enough
 	reportLogLevel := ConvertLevelFromString(cfg.LogLevel)
 	logLevel := ConvertLevelFromString(b.Level)
+	writer := localLogWriter(b.Level)
 	if logLevel >= reportLogLevel || reportLogLevel == LevelUnknown || cfg.LocalOnly {
-		fmt.Printf("%s %s >> %s:%d >> %s\n", out, time.Now().Format("2006-01-02 15:04:05"), b.File, b.LineNumber, log)
+		_, _ = fmt.Fprintf(writer, "%s %s >> %s:%d >> %s\n", out, time.Now().Format("2006-01-02 15:04:05"), b.File, b.LineNumber, log)
 	}
 
 	if b.Stack != nil {
 		extra := &bytes.Buffer{}
 		cW(extra, true, bMagenta, "Stack:")
-		fmt.Printf("%s", extra)
+		_, _ = fmt.Fprintf(writer, "%s", extra)
 		PrintPrettyStack(b.Stack)
 		return
+	}
+}
+
+func localLogWriter(level string) io.Writer {
+	switch level {
+	case WARN, ERROR, CRASH, PANIC, FATAL:
+		return os.Stderr
+	default:
+		return os.Stdout
 	}
 }
 
