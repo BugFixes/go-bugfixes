@@ -117,16 +117,17 @@ func (s *System) config() bugfixes.Config {
 }
 
 func ParseBugLine(bugLine string) (string, string, int, error) {
-	i := strings.Index(bugLine, ":")
+	i := strings.LastIndex(bugLine, ":")
 	if i < 0 {
 		return "", "", 0, fmt.Errorf("failed to find ':' in bug line: %s", bugLine)
 	}
-	j := strings.Index(bugLine, " ")
+	rest := bugLine[i+1:]
+	j := strings.Index(rest, " ")
 	if j < 0 {
 		return "", "", 0, fmt.Errorf("failed to find ' ' in bug line: %s", bugLine)
 	}
 	file := bugLine[:i]
-	lne := bugLine[i+1 : j]
+	lne := rest[:j]
 	line, err := strconv.Atoi(lne)
 	if err != nil {
 		return file, lne, 0, fmt.Errorf("failed to convert line number: %w", err)
