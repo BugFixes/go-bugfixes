@@ -1,13 +1,41 @@
 package middleware_test
 
 import (
+	"io"
 	"net/http"
 	"net/http/httptest"
+	"os"
 	"testing"
 
 	"github.com/bugfixes/go-bugfixes/middleware"
 	"github.com/stretchr/testify/assert"
 )
+
+func captureStderr(t *testing.T, fn func()) string {
+	t.Helper()
+
+	origStderr := os.Stderr
+	reader, writer, err := os.Pipe()
+	if err != nil {
+		t.Fatalf("create stderr pipe: %v", err)
+	}
+
+	os.Stderr = writer
+	defer func() {
+		os.Stderr = origStderr
+	}()
+
+	fn()
+
+	_ = writer.Close()
+
+	stderr, err := io.ReadAll(reader)
+	if err != nil {
+		t.Fatalf("read stderr: %v", err)
+	}
+
+	return string(stderr)
+}
 
 func TestRecoverer_PanicReturns500(t *testing.T) {
 	next := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -118,4 +146,23 @@ func TestRecoverer_SystemMethod(t *testing.T) {
 		handler.ServeHTTP(rr, req)
 	})
 	assert.Equal(t, http.StatusInternalServerError, rr.Code)
+}
+
+func TestPrintPrettyStack_StackBytesHideRawByteSlice(t *testing.T) {
+	fakeStack := []byte(`goroutine 1 [running]:
+runtime/debug.Stack()
+	/usr/local/go/src/runtime/debug/stack.go:24 +0x5e
+main.doSomething()
+	/app/main.go:42 +0x1a
+main.main()
+	/app/main.go:10 +0x25
+`)
+
+	stderr := captureStderr(t, func() {
+		middleware.PrintPrettyStack(fakeStack)
+	})
+
+	assert.NotContains(t, stderr, "panic: [")
+	assert.NotContains(t, stderr, "[103 111")
+	assert.Contains(t, stderr, "main.go")
 }
