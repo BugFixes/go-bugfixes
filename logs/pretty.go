@@ -7,15 +7,16 @@ import (
 	"os"
 	"runtime/debug"
 	"strings"
+	"unicode/utf8"
 )
 
 type prettyStack struct {
 }
 
 func PrintPrettyStack(rvr interface{}) {
-	debugStack := debug.Stack()
+	debugStack, panicValue, showPanicValue := prettyStackInput(rvr)
 	s := prettyStack{}
-	out, err := s.parse(debugStack, rvr)
+	out, err := s.parseWithOptions(debugStack, panicValue, showPanicValue)
 	if err == nil {
 		_, _ = os.Stderr.Write(out)
 	} else {
@@ -25,13 +26,19 @@ func PrintPrettyStack(rvr interface{}) {
 }
 
 func (s prettyStack) parse(debugStack []byte, rvr interface{}) ([]byte, error) {
+	return s.parseWithOptions(debugStack, rvr, true)
+}
+
+func (s prettyStack) parseWithOptions(debugStack []byte, rvr interface{}, showPanicValue bool) ([]byte, error) {
 	var err error
 	buf := &bytes.Buffer{}
 
 	cW(buf, false, bRed, "\n")
-	cW(buf, true, bCyan, " panic: ")
-	cW(buf, true, bBlue, "%v", rvr)
-	cW(buf, false, bWhite, "\n \n")
+	if showPanicValue {
+		cW(buf, true, bCyan, " panic: ")
+		cW(buf, true, bBlue, "%v", rvr)
+		cW(buf, false, bWhite, "\n \n")
+	}
 
 	// process debug stack info
 	stack := strings.Split(string(debugStack), "\n")
@@ -66,6 +73,35 @@ func (s prettyStack) parse(debugStack []byte, rvr interface{}) ([]byte, error) {
 		}
 	}
 	return buf.Bytes(), nil
+}
+
+func prettyStackInput(rvr interface{}) ([]byte, interface{}, bool) {
+	switch v := rvr.(type) {
+	case []byte:
+		if looksLikeStackTrace(v) {
+			return v, nil, false
+		}
+		return debug.Stack(), readableBytes(v), true
+	case string:
+		if looksLikeStackTrace([]byte(v)) {
+			return []byte(v), nil, false
+		}
+		return debug.Stack(), v, true
+	default:
+		return debug.Stack(), rvr, true
+	}
+}
+
+func looksLikeStackTrace(stack []byte) bool {
+	return bytes.Contains(stack, []byte("goroutine ")) && bytes.Contains(stack, []byte(".go:"))
+}
+
+func readableBytes(value []byte) interface{} {
+	if utf8.Valid(value) {
+		return string(value)
+	}
+
+	return fmt.Sprintf("%x", value)
 }
 
 func (s prettyStack) decorateLine(line string, useColor bool, num int) (string, error) {

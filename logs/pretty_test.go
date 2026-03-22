@@ -110,3 +110,22 @@ func TestPrintPrettyStack_DoesNotPanic(t *testing.T) {
 		PrintPrettyStack(nil)
 	})
 }
+
+func TestPrintPrettyStack_StackBytesHideRawByteSlice(t *testing.T) {
+	fakeStack := []byte(`goroutine 1 [running]:
+runtime/debug.Stack()
+	/usr/local/go/src/runtime/debug/stack.go:24 +0x5e
+main.doSomething()
+	/app/main.go:42 +0x1a
+main.main()
+	/app/main.go:10 +0x25
+`)
+
+	_, stderr := captureStandardStreams(t, func() {
+		PrintPrettyStack(fakeStack)
+	})
+
+	assert.NotContains(t, stderr, "panic: [")
+	assert.NotContains(t, stderr, "[103 111")
+	assert.Contains(t, stderr, "main.go")
+}
