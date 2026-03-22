@@ -59,10 +59,6 @@ func PrintPrettyStack(rvr interface{}) {
 type prettyStack struct {
 }
 
-func (s prettyStack) parse(debugStack []byte, rvr interface{}) ([]byte, error) {
-	return s.parseWithOptions(debugStack, rvr, true)
-}
-
 func (s prettyStack) parseWithOptions(debugStack []byte, rvr interface{}, showPanicValue bool) ([]byte, error) {
 	var err error
 

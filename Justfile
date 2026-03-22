@@ -6,7 +6,6 @@ tools_bin := root / "bin"
 golangci_lint := tools_bin / "golangci-lint"
 goimports := tools_bin / "goimports"
 go_packages := "./..."
-go_files := `find . -type f -name '*.go' -not -path './.cache/*'`
 go_cache := root / ".cache/go-build"
 go_mod_cache := root / ".cache/go-mod"
 go_tmp := root / ".cache/tmp"
@@ -28,8 +27,8 @@ tidy: _prepare
     {{ go }} mod tidy
 
 fmt: tools
-    gofmt -w -s {{ go_files }}
-    "{{ goimports }}" -w {{ go_files }}
+    find . -type f -name '*.go' -not -path './.cache/*' -print0 | xargs -0 gofmt -w -s
+    find . -type f -name '*.go' -not -path './.cache/*' -print0 | xargs -0 "{{ goimports }}" -w
 
 lint: tools
     "{{ golangci_lint }}" run --config configs/golangci.yml
