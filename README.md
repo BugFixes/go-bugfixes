@@ -149,6 +149,7 @@ system.AddSecureConfig("example.com", bugfixes.SecureConfig{
 system.AddSecureConfig("api.example.com", bugfixes.SecureConfig{
 	XFrameOptions: "DENY",
 	CSP:           "default-src 'self'",
+	HSTSEnabled:   true,
 	HSTSMaxAge:    730 * 24 * time.Hour, // 2 years
 })
 
