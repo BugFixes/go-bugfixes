@@ -92,6 +92,97 @@ system.AddMiddleware(
 handler := system.Handler(mux)
 ```
 
+### CORS
+
+Enable CORS with domain-specific configuration:
+
+```go
+system := bugfixes.NewMiddleware()
+system.AddAllowedOrigins("https://example.com", "https://app.example.com")
+system.AddAllowedMethods("GET", "POST", "PUT", "DELETE")
+system.AddAllowedHeaders("Authorization", "X-Custom-Header")
+system.AddMiddleware(system.CORS)
+handler := system.Handler(mux)
+```
+
+Multiple domains are supported. Requests from unlisted origins return `403 Forbidden`.
+
+### Security Headers
+
+Enable security headers with production-safe defaults:
+
+```go
+system := bugfixes.NewMiddleware()
+system.SetSecure(true)
+system.AddMiddleware(system.Secure)
+handler := system.Handler(mux)
+```
+
+This sets the following headers by default:
+
+| Header | Value |
+|--------|-------|
+| X-Frame-Options | DENY |
+| X-Content-Type-Options | nosniff |
+| X-XSS-Protection | 1; mode=block |
+| Strict-Transport-Security | max-age=31536000; includeSubDomains |
+| Content-Security-Policy | default-src 'self' |
+| Referrer-Policy | strict-origin-when-cross-origin |
+
+#### Domain-Specific Configuration
+
+Override defaults per-domain:
+
+```go
+import "time"
+
+system := bugfixes.NewMiddleware()
+system.SetSecure(true)
+
+// Allow iframes on main site
+system.AddSecureConfig("example.com", bugfixes.SecureConfig{
+	XFrameOptions: "SAMEORIGIN",
+	CSP:           "default-src 'self'; script-src 'self' 'unsafe-inline'",
+})
+
+// Stricter CSP for API subdomain
+system.AddSecureConfig("api.example.com", bugfixes.SecureConfig{
+	XFrameOptions: "DENY",
+	CSP:           "default-src 'self'",
+	HSTSMaxAge:    730 * 24 * time.Hour, // 2 years
+})
+
+system.AddMiddleware(system.Secure)
+handler := system.Handler(mux)
+```
+
+#### HSTS Options
+
+Configure HSTS with additional options:
+
+```go
+import "time"
+
+system.AddSecureConfig("example.com", bugfixes.SecureConfig{
+	HSTSEnabled:            true,
+	HSTSMaxAge:            180 * 24 * time.Hour, // 6 months
+	HSTSIncludeSubdomains: true,
+	HSTSPreload:           true,
+})
+```
+
+#### Disabling Headers
+
+Set empty string or `false` to disable individual headers:
+
+```go
+system.AddSecureConfig("example.com", bugfixes.SecureConfig{
+	XFrameOptions:        "",    // removes X-Frame-Options
+	XContentTypeOptions:  false, // removes X-Content-Type-Options
+	XXSSProtection:       "",    // removes X-XSS-Protection
+})
+```
+
 ## Development
 
 Common repo tasks:
