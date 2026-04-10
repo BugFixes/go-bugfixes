@@ -131,7 +131,7 @@ This sets the following headers by default:
 
 #### Domain-Specific Configuration
 
-Override defaults per-domain:
+Override defaults per-domain. Only set the fields you want to change; unset fields use defaults:
 
 ```go
 import "time"
@@ -141,16 +141,15 @@ system.SetSecure(true)
 
 // Allow iframes on main site
 system.AddSecureConfig("example.com", bugfixes.SecureConfig{
-	XFrameOptions: "SAMEORIGIN",
-	CSP:           "default-src 'self'; script-src 'self' 'unsafe-inline'",
+	XFrameOptions: bugfixes.StrPtr("SAMEORIGIN"),
+	CSP:          bugfixes.StrPtr("default-src 'self'; script-src 'self' 'unsafe-inline'"),
 })
 
 // Stricter CSP for API subdomain
 system.AddSecureConfig("api.example.com", bugfixes.SecureConfig{
-	XFrameOptions: "DENY",
-	CSP:           "default-src 'self'",
-	HSTSEnabled:   true,
-	HSTSMaxAge:    730 * 24 * time.Hour, // 2 years
+	XFrameOptions: bugfixes.StrPtr("DENY"),
+	CSP:          bugfixes.StrPtr("default-src 'self'"),
+	HSTSMaxAge:   bugfixes.DurationPtr(730 * 24 * time.Hour), // 2 years
 })
 
 system.AddMiddleware(system.Secure)
@@ -165,10 +164,10 @@ Configure HSTS with additional options:
 import "time"
 
 system.AddSecureConfig("example.com", bugfixes.SecureConfig{
-	HSTSEnabled:            true,
-	HSTSMaxAge:            180 * 24 * time.Hour, // 6 months
-	HSTSIncludeSubdomains: true,
-	HSTSPreload:           true,
+	HSTSEnabled:            bugfixes.BoolPtr(true),
+	HSTSMaxAge:            bugfixes.DurationPtr(180 * 24 * time.Hour), // 6 months
+	HSTSIncludeSubdomains: bugfixes.BoolPtr(true),
+	HSTSPreload:           bugfixes.BoolPtr(true),
 })
 ```
 
@@ -178,9 +177,9 @@ Set empty string or `false` to disable individual headers:
 
 ```go
 system.AddSecureConfig("example.com", bugfixes.SecureConfig{
-	XFrameOptions:        "",    // removes X-Frame-Options
-	XContentTypeOptions:  false, // removes X-Content-Type-Options
-	XXSSProtection:       "",    // removes X-XSS-Protection
+	XFrameOptions:       bugfixes.StrPtr(""),      // removes X-Frame-Options
+	XContentTypeOptions: bugfixes.BoolPtr(false), // removes X-Content-Type-Options
+	XXSSProtection:      bugfixes.StrPtr(""),      // removes X-XSS-Protection
 })
 ```
 

@@ -9,28 +9,33 @@ import (
 )
 
 type SecureConfig struct {
-	XFrameOptions         string
-	XContentTypeOptions   bool
-	XXSSProtection        string
-	HSTSEnabled           bool
-	HSTSMaxAge            time.Duration
-	HSTSIncludeSubdomains bool
-	HSTSPreload           bool
-	CSP                   string
-	ReferrerPolicy        string
-	PermissionsPolicy     string
+	XFrameOptions         *string
+	XContentTypeOptions   *bool
+	XXSSProtection        *string
+	HSTSEnabled           *bool
+	HSTSMaxAge            *time.Duration
+	HSTSIncludeSubdomains *bool
+	HSTSPreload           *bool
+	CSP                   *string
+	ReferrerPolicy        *string
+	PermissionsPolicy     *string
 }
 
 var DefaultSecureConfig = SecureConfig{
-	XFrameOptions:         "DENY",
-	XContentTypeOptions:   true,
-	XXSSProtection:        "1; mode=block",
-	HSTSEnabled:           true,
-	HSTSMaxAge:            365 * 24 * time.Hour,
-	HSTSIncludeSubdomains: true,
-	ReferrerPolicy:        "strict-origin-when-cross-origin",
-	CSP:                   "default-src 'self'",
+	XFrameOptions:         StrPtr("DENY"),
+	XContentTypeOptions:   BoolPtr(true),
+	XXSSProtection:        StrPtr("1; mode=block"),
+	HSTSEnabled:           BoolPtr(true),
+	HSTSMaxAge:            DurationPtr(365 * 24 * time.Hour),
+	HSTSIncludeSubdomains: BoolPtr(true),
+	HSTSPreload:           BoolPtr(false),
+	ReferrerPolicy:        StrPtr("strict-origin-when-cross-origin"),
+	CSP:                   StrPtr("default-src 'self'"),
 }
+
+func StrPtr(s string) *string                    { return &s }
+func BoolPtr(b bool) *bool                       { return &b }
+func DurationPtr(d time.Duration) *time.Duration { return &d }
 
 type System struct {
 	mu sync.RWMutex

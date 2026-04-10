@@ -52,10 +52,10 @@ func TestSecure_CustomConfig_OverridesDefaults(t *testing.T) {
 	s := middleware.NewMiddleware()
 	s.SetSecure(true)
 	s.AddSecureConfig("example.com", middleware.SecureConfig{
-		XFrameOptions:       "SAMEORIGIN",
-		XContentTypeOptions: false,
-		CSP:                 "default-src 'self'; script-src 'self' 'unsafe-inline'",
-		ReferrerPolicy:      "no-referrer",
+		XFrameOptions:       middleware.StrPtr("SAMEORIGIN"),
+		XContentTypeOptions: middleware.BoolPtr(false),
+		CSP:                 middleware.StrPtr("default-src 'self'; script-src 'self' 'unsafe-inline'"),
+		ReferrerPolicy:      middleware.StrPtr("no-referrer"),
 	})
 
 	handler := s.Secure(newOKHandler())
@@ -76,13 +76,13 @@ func TestSecure_DomainSpecificConfigs(t *testing.T) {
 	s.SetSecure(true)
 
 	s.AddSecureConfig("example.com", middleware.SecureConfig{
-		XFrameOptions: "SAMEORIGIN",
-		CSP:           "default-src 'self'",
+		XFrameOptions: middleware.StrPtr("SAMEORIGIN"),
+		CSP:           middleware.StrPtr("default-src 'self'"),
 	})
 
 	s.AddSecureConfig("api.example.com", middleware.SecureConfig{
-		XFrameOptions: "DENY",
-		CSP:           "default-src 'self'; connect-src 'self' https://api.example.com",
+		XFrameOptions: middleware.StrPtr("DENY"),
+		CSP:           middleware.StrPtr("default-src 'self'; connect-src 'self' https://api.example.com"),
 	})
 
 	handler := s.Secure(newOKHandler())
@@ -131,10 +131,10 @@ func TestSecure_HSTS_AllOptions(t *testing.T) {
 	s := middleware.NewMiddleware()
 	s.SetSecure(true)
 	s.AddSecureConfig("example.com", middleware.SecureConfig{
-		HSTSEnabled:           true,
-		HSTSMaxAge:            180 * 24 * time.Hour,
-		HSTSIncludeSubdomains: true,
-		HSTSPreload:           true,
+		HSTSEnabled:           middleware.BoolPtr(true),
+		HSTSMaxAge:            middleware.DurationPtr(180 * 24 * time.Hour),
+		HSTSIncludeSubdomains: middleware.BoolPtr(true),
+		HSTSPreload:           middleware.BoolPtr(true),
 	})
 
 	handler := s.Secure(newOKHandler())
@@ -154,7 +154,7 @@ func TestSecure_HSTS_Disabled(t *testing.T) {
 	s := middleware.NewMiddleware()
 	s.SetSecure(true)
 	s.AddSecureConfig("example.com", middleware.SecureConfig{
-		HSTSEnabled: false,
+		HSTSEnabled: middleware.BoolPtr(false),
 	})
 
 	handler := s.Secure(newOKHandler())
@@ -171,9 +171,9 @@ func TestSecure_HSTS_NoSubdomains(t *testing.T) {
 	s := middleware.NewMiddleware()
 	s.SetSecure(true)
 	s.AddSecureConfig("example.com", middleware.SecureConfig{
-		HSTSEnabled:           true,
-		HSTSMaxAge:            365 * 24 * time.Hour,
-		HSTSIncludeSubdomains: false,
+		HSTSEnabled:           middleware.BoolPtr(true),
+		HSTSMaxAge:            middleware.DurationPtr(365 * 24 * time.Hour),
+		HSTSIncludeSubdomains: middleware.BoolPtr(false),
 	})
 
 	handler := s.Secure(newOKHandler())
@@ -191,7 +191,7 @@ func TestSecure_PermissionsPolicy(t *testing.T) {
 	s := middleware.NewMiddleware()
 	s.SetSecure(true)
 	s.AddSecureConfig("example.com", middleware.SecureConfig{
-		PermissionsPolicy: "geolocation=(self), microphone=()",
+		PermissionsPolicy: middleware.StrPtr("geolocation=(self), microphone=()"),
 	})
 
 	handler := s.Secure(newOKHandler())
@@ -208,7 +208,7 @@ func TestSecure_XXSSProtection_Disabled(t *testing.T) {
 	s := middleware.NewMiddleware()
 	s.SetSecure(true)
 	s.AddSecureConfig("example.com", middleware.SecureConfig{
-		XXSSProtection: "",
+		XXSSProtection: middleware.StrPtr(""),
 	})
 
 	handler := s.Secure(newOKHandler())
@@ -225,7 +225,7 @@ func TestSecure_XFrameOptions_AllowFrom(t *testing.T) {
 	s := middleware.NewMiddleware()
 	s.SetSecure(true)
 	s.AddSecureConfig("example.com", middleware.SecureConfig{
-		XFrameOptions: "ALLOW-FROM https://trusted.com",
+		XFrameOptions: middleware.StrPtr("ALLOW-FROM https://trusted.com"),
 	})
 
 	handler := s.Secure(newOKHandler())
@@ -279,11 +279,11 @@ func TestSecure_AppendSecureConfigs(t *testing.T) {
 	s.SetSecure(true)
 
 	s.AddSecureConfig("one.com", middleware.SecureConfig{
-		XFrameOptions: "SAMEORIGIN",
+		XFrameOptions: middleware.StrPtr("SAMEORIGIN"),
 	})
 
 	s.AddSecureConfig("two.com", middleware.SecureConfig{
-		XFrameOptions: "DENY",
+		XFrameOptions: middleware.StrPtr("DENY"),
 	})
 
 	handler := s.Secure(newOKHandler())
@@ -306,11 +306,11 @@ func TestSetSecureConfig_UpdatesExisting(t *testing.T) {
 	s.SetSecure(true)
 
 	s.SetSecureConfig("example.com", middleware.SecureConfig{
-		XFrameOptions: "SAMEORIGIN",
+		XFrameOptions: middleware.StrPtr("SAMEORIGIN"),
 	})
 
 	s.SetSecureConfig("example.com", middleware.SecureConfig{
-		XFrameOptions: "DENY",
+		XFrameOptions: middleware.StrPtr("DENY"),
 	})
 
 	handler := s.Secure(newOKHandler())
@@ -328,7 +328,7 @@ func TestSecureConfig_WithHostPort(t *testing.T) {
 	s.SetSecure(true)
 
 	s.AddSecureConfig("example.com:8080", middleware.SecureConfig{
-		XFrameOptions: "SAMEORIGIN",
+		XFrameOptions: middleware.StrPtr("SAMEORIGIN"),
 	})
 
 	handler := s.Secure(newOKHandler())
@@ -360,7 +360,7 @@ func TestSecure_CSPWithReportURI(t *testing.T) {
 	s := middleware.NewMiddleware()
 	s.SetSecure(true)
 	s.AddSecureConfig("example.com", middleware.SecureConfig{
-		CSP: "default-src 'self'; report-uri /csp-report",
+		CSP: middleware.StrPtr("default-src 'self'; report-uri /csp-report"),
 	})
 
 	handler := s.Secure(newOKHandler())
@@ -392,7 +392,7 @@ func TestSecure_ReferrerPolicy_Values(t *testing.T) {
 			s := middleware.NewMiddleware()
 			s.SetSecure(true)
 			s.AddSecureConfig("example.com", middleware.SecureConfig{
-				ReferrerPolicy: tc.policy,
+				ReferrerPolicy: middleware.StrPtr(tc.policy),
 			})
 
 			handler := s.Secure(newOKHandler())
@@ -411,7 +411,7 @@ func TestSecure_XContentTypeOptions_NosniffOnly(t *testing.T) {
 	s := middleware.NewMiddleware()
 	s.SetSecure(true)
 	s.AddSecureConfig("example.com", middleware.SecureConfig{
-		XContentTypeOptions: true,
+		XContentTypeOptions: middleware.BoolPtr(true),
 	})
 
 	handler := s.Secure(newOKHandler())
@@ -427,14 +427,36 @@ func TestSecure_XContentTypeOptions_NosniffOnly(t *testing.T) {
 func TestDefaultSecureConfig_Values(t *testing.T) {
 	cfg := middleware.DefaultSecureConfig
 
-	assert.Equal(t, "DENY", cfg.XFrameOptions)
-	assert.True(t, cfg.XContentTypeOptions)
-	assert.Equal(t, "1; mode=block", cfg.XXSSProtection)
-	assert.True(t, cfg.HSTSEnabled)
-	assert.Equal(t, 365*24*time.Hour, cfg.HSTSMaxAge)
-	assert.True(t, cfg.HSTSIncludeSubdomains)
-	assert.False(t, cfg.HSTSPreload)
-	assert.Equal(t, "default-src 'self'", cfg.CSP)
-	assert.Equal(t, "strict-origin-when-cross-origin", cfg.ReferrerPolicy)
-	assert.Empty(t, cfg.PermissionsPolicy)
+	assert.Equal(t, "DENY", *cfg.XFrameOptions)
+	assert.True(t, *cfg.XContentTypeOptions)
+	assert.Equal(t, "1; mode=block", *cfg.XXSSProtection)
+	assert.True(t, *cfg.HSTSEnabled)
+	assert.Equal(t, 365*24*time.Hour, *cfg.HSTSMaxAge)
+	assert.True(t, *cfg.HSTSIncludeSubdomains)
+	assert.False(t, *cfg.HSTSPreload)
+	assert.Equal(t, "default-src 'self'", *cfg.CSP)
+	assert.Equal(t, "strict-origin-when-cross-origin", *cfg.ReferrerPolicy)
+	assert.Nil(t, cfg.PermissionsPolicy)
+}
+
+func TestSecure_PartialConfig_MergesWithDefaults(t *testing.T) {
+	s := middleware.NewMiddleware()
+	s.SetSecure(true)
+
+	s.AddSecureConfig("example.com", middleware.SecureConfig{
+		XFrameOptions: middleware.StrPtr("SAMEORIGIN"),
+	})
+
+	handler := s.Secure(newOKHandler())
+	req := httptest.NewRequest(http.MethodGet, "/", nil)
+	req.Host = "example.com"
+	rr := httptest.NewRecorder()
+
+	handler.ServeHTTP(rr, req)
+
+	assert.Equal(t, "SAMEORIGIN", rr.Header().Get("X-Frame-Options"))
+	assert.Equal(t, "nosniff", rr.Header().Get("X-Content-Type-Options"))
+	assert.Equal(t, "max-age=31536000; includeSubDomains", rr.Header().Get("Strict-Transport-Security"))
+	assert.Equal(t, "default-src 'self'", rr.Header().Get("Content-Security-Policy"))
+	assert.Equal(t, "strict-origin-when-cross-origin", rr.Header().Get("Referrer-Policy"))
 }

@@ -34,11 +34,42 @@ func (s *System) getSecureConfig(domain string) SecureConfig {
 	s.mu.RLock()
 	defer s.mu.RUnlock()
 
-	if cfg, ok := s.SecureConfigs[domain]; ok {
-		return cfg
+	config := DefaultSecureConfig
+
+	if domainCfg, ok := s.SecureConfigs[domain]; ok {
+		if domainCfg.XFrameOptions != nil {
+			config.XFrameOptions = domainCfg.XFrameOptions
+		}
+		if domainCfg.XContentTypeOptions != nil {
+			config.XContentTypeOptions = domainCfg.XContentTypeOptions
+		}
+		if domainCfg.XXSSProtection != nil {
+			config.XXSSProtection = domainCfg.XXSSProtection
+		}
+		if domainCfg.HSTSEnabled != nil {
+			config.HSTSEnabled = domainCfg.HSTSEnabled
+		}
+		if domainCfg.HSTSMaxAge != nil {
+			config.HSTSMaxAge = domainCfg.HSTSMaxAge
+		}
+		if domainCfg.HSTSIncludeSubdomains != nil {
+			config.HSTSIncludeSubdomains = domainCfg.HSTSIncludeSubdomains
+		}
+		if domainCfg.HSTSPreload != nil {
+			config.HSTSPreload = domainCfg.HSTSPreload
+		}
+		if domainCfg.CSP != nil {
+			config.CSP = domainCfg.CSP
+		}
+		if domainCfg.ReferrerPolicy != nil {
+			config.ReferrerPolicy = domainCfg.ReferrerPolicy
+		}
+		if domainCfg.PermissionsPolicy != nil {
+			config.PermissionsPolicy = domainCfg.PermissionsPolicy
+		}
 	}
 
-	return DefaultSecureConfig
+	return config
 }
 
 func (s *System) Secure(next http.Handler) http.Handler {
@@ -51,39 +82,39 @@ func (s *System) Secure(next http.Handler) http.Handler {
 		domain := r.Host
 		config := s.getSecureConfig(domain)
 
-		if config.XFrameOptions != "" {
-			w.Header().Set("X-Frame-Options", config.XFrameOptions)
+		if config.XFrameOptions != nil && *config.XFrameOptions != "" {
+			w.Header().Set("X-Frame-Options", *config.XFrameOptions)
 		}
 
-		if config.XContentTypeOptions {
+		if config.XContentTypeOptions != nil && *config.XContentTypeOptions {
 			w.Header().Set("X-Content-Type-Options", "nosniff")
 		}
 
-		if config.XXSSProtection != "" {
-			w.Header().Set("X-XSS-Protection", config.XXSSProtection)
+		if config.XXSSProtection != nil && *config.XXSSProtection != "" {
+			w.Header().Set("X-XSS-Protection", *config.XXSSProtection)
 		}
 
-		if config.HSTSEnabled {
-			hsts := fmt.Sprintf("max-age=%d", int(config.HSTSMaxAge.Seconds()))
-			if config.HSTSIncludeSubdomains {
+		if config.HSTSEnabled != nil && *config.HSTSEnabled {
+			hsts := fmt.Sprintf("max-age=%d", int((*config.HSTSMaxAge).Seconds()))
+			if config.HSTSIncludeSubdomains != nil && *config.HSTSIncludeSubdomains {
 				hsts += "; includeSubDomains"
 			}
-			if config.HSTSPreload {
+			if config.HSTSPreload != nil && *config.HSTSPreload {
 				hsts += "; preload"
 			}
 			w.Header().Set("Strict-Transport-Security", hsts)
 		}
 
-		if config.CSP != "" {
-			w.Header().Set("Content-Security-Policy", config.CSP)
+		if config.CSP != nil && *config.CSP != "" {
+			w.Header().Set("Content-Security-Policy", *config.CSP)
 		}
 
-		if config.ReferrerPolicy != "" {
-			w.Header().Set("Referrer-Policy", config.ReferrerPolicy)
+		if config.ReferrerPolicy != nil && *config.ReferrerPolicy != "" {
+			w.Header().Set("Referrer-Policy", *config.ReferrerPolicy)
 		}
 
-		if config.PermissionsPolicy != "" {
-			w.Header().Set("Permissions-Policy", config.PermissionsPolicy)
+		if config.PermissionsPolicy != nil && *config.PermissionsPolicy != "" {
+			w.Header().Set("Permissions-Policy", *config.PermissionsPolicy)
 		}
 
 		next.ServeHTTP(w, r)
