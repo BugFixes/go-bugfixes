@@ -95,7 +95,7 @@ func (s *System) Secure(next http.Handler) http.Handler {
 		}
 
 		if config.HSTSEnabled != nil && *config.HSTSEnabled {
-			hsts := fmt.Sprintf("max-age=%d", int((*config.HSTSMaxAge).Seconds()))
+			hsts := fmt.Sprintf("max-age=%d", int(config.HSTSMaxAge.Seconds()))
 			if config.HSTSIncludeSubdomains != nil && *config.HSTSIncludeSubdomains {
 				hsts += "; includeSubDomains"
 			}
