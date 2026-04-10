@@ -22,20 +22,20 @@ type SecureConfig struct {
 }
 
 var DefaultSecureConfig = SecureConfig{
-	XFrameOptions:         StrPtr("DENY"),
-	XContentTypeOptions:   BoolPtr(true),
-	XXSSProtection:        StrPtr("1; mode=block"),
-	HSTSEnabled:           BoolPtr(true),
-	HSTSMaxAge:            DurationPtr(365 * 24 * time.Hour),
-	HSTSIncludeSubdomains: BoolPtr(true),
-	HSTSPreload:           BoolPtr(false),
-	ReferrerPolicy:        StrPtr("strict-origin-when-cross-origin"),
-	CSP:                   StrPtr("default-src 'self'"),
+	XFrameOptions:         Ptr("DENY"),
+	XContentTypeOptions:   Ptr(true),
+	XXSSProtection:        Ptr("1; mode=block"),
+	HSTSEnabled:           Ptr(true),
+	HSTSMaxAge:            Ptr(365 * 24 * time.Hour),
+	HSTSIncludeSubdomains: Ptr(true),
+	HSTSPreload:           Ptr(false),
+	ReferrerPolicy:        Ptr("strict-origin-when-cross-origin"),
+	CSP:                   Ptr("default-src 'self'"),
 }
 
-func StrPtr(s string) *string                    { return &s }
-func BoolPtr(b bool) *bool                       { return &b }
-func DurationPtr(d time.Duration) *time.Duration { return &d }
+func Ptr[T any](v T) *T {
+	return &v
+}
 
 type System struct {
 	mu sync.RWMutex

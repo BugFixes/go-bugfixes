@@ -141,15 +141,15 @@ system.SetSecure(true)
 
 // Allow iframes on main site
 system.AddSecureConfig("example.com", bugfixes.SecureConfig{
-	XFrameOptions: bugfixes.StrPtr("SAMEORIGIN"),
-	CSP:          bugfixes.StrPtr("default-src 'self'; script-src 'self' 'unsafe-inline'"),
+	XFrameOptions: bugfixes.Ptr("SAMEORIGIN"),
+	CSP:          bugfixes.Ptr("default-src 'self'; script-src 'self' 'unsafe-inline'"),
 })
 
 // Stricter CSP for API subdomain
 system.AddSecureConfig("api.example.com", bugfixes.SecureConfig{
-	XFrameOptions: bugfixes.StrPtr("DENY"),
-	CSP:          bugfixes.StrPtr("default-src 'self'"),
-	HSTSMaxAge:   bugfixes.DurationPtr(730 * 24 * time.Hour), // 2 years
+	XFrameOptions: bugfixes.Ptr("DENY"),
+	CSP:          bugfixes.Ptr("default-src 'self'"),
+	HSTSMaxAge:   bugfixes.Ptr(730 * 24 * time.Hour), // 2 years
 })
 
 system.AddMiddleware(system.Secure)
@@ -164,10 +164,10 @@ Configure HSTS with additional options:
 import "time"
 
 system.AddSecureConfig("example.com", bugfixes.SecureConfig{
-	HSTSEnabled:            bugfixes.BoolPtr(true),
-	HSTSMaxAge:            bugfixes.DurationPtr(180 * 24 * time.Hour), // 6 months
-	HSTSIncludeSubdomains: bugfixes.BoolPtr(true),
-	HSTSPreload:           bugfixes.BoolPtr(true),
+	HSTSEnabled:            bugfixes.Ptr(true),
+	HSTSMaxAge:            bugfixes.Ptr(180 * 24 * time.Hour), // 6 months
+	HSTSIncludeSubdomains: bugfixes.Ptr(true),
+	HSTSPreload:           bugfixes.Ptr(true),
 })
 ```
 
@@ -177,9 +177,9 @@ Set empty string or `false` to disable individual headers:
 
 ```go
 system.AddSecureConfig("example.com", bugfixes.SecureConfig{
-	XFrameOptions:       bugfixes.StrPtr(""),      // removes X-Frame-Options
-	XContentTypeOptions: bugfixes.BoolPtr(false), // removes X-Content-Type-Options
-	XXSSProtection:      bugfixes.StrPtr(""),      // removes X-XSS-Protection
+	XFrameOptions:       bugfixes.Ptr(""),      // removes X-Frame-Options
+	XContentTypeOptions: bugfixes.Ptr(false), // removes X-Content-Type-Options
+	XXSSProtection:      bugfixes.Ptr(""),      // removes X-XSS-Protection
 })
 ```
 
