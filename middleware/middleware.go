@@ -3,9 +3,39 @@ package middleware
 import (
 	"net/http"
 	"sync"
+	"time"
 
 	bugfixes "github.com/bugfixes/go-bugfixes"
 )
+
+type SecureConfig struct {
+	XFrameOptions         *string
+	XContentTypeOptions   *bool
+	XXSSProtection        *string
+	HSTSEnabled           *bool
+	HSTSMaxAge            *time.Duration
+	HSTSIncludeSubdomains *bool
+	HSTSPreload           *bool
+	CSP                   *string
+	ReferrerPolicy        *string
+	PermissionsPolicy     *string
+}
+
+var DefaultSecureConfig = SecureConfig{
+	XFrameOptions:         Ptr("DENY"),
+	XContentTypeOptions:   Ptr(true),
+	XXSSProtection:        Ptr("1; mode=block"),
+	HSTSEnabled:           Ptr(true),
+	HSTSMaxAge:            Ptr(365 * 24 * time.Hour),
+	HSTSIncludeSubdomains: Ptr(true),
+	HSTSPreload:           Ptr(false),
+	ReferrerPolicy:        Ptr("strict-origin-when-cross-origin"),
+	CSP:                   Ptr("default-src 'self'"),
+}
+
+func Ptr[T any](v T) *T {
+	return &v
+}
 
 type System struct {
 	mu sync.RWMutex
@@ -22,6 +52,10 @@ type System struct {
 	AllowedOrigins []string
 	AllowedHeaders []string
 	AllowedMethods []string
+
+	// Secure headers
+	SecureEnabled bool
+	SecureConfigs map[string]SecureConfig
 }
 
 func NewMiddleware() *System {
