@@ -104,6 +104,10 @@ type LogEntry interface {
 	Panic(v interface{})
 }
 
+type requestIDLogEntry interface {
+	SetRequestID(requestID string)
+}
+
 // GetLogEntry returns the in-context LogEntry for a request.
 func GetLogEntry(r *http.Request) LogEntry {
 	entry, _ := r.Context().Value(LogEntryCtxKey).(LogEntry)
@@ -136,11 +140,12 @@ func (l *DefaultLogFormatter) NewLogEntry(r *http.Request) LogEntry {
 		request:             r,
 		buf:                 &bytes.Buffer{},
 		useColor:            useColor,
+		requestID:           GetReqID(r.Context()),
 	}
 
-	reqID := GetReqID(r.Context())
-	if reqID != "" {
-		cW(entry.buf, useColor, nYellow, "[%s] ", reqID)
+	if entry.requestID != "" {
+		entry.requestIDLogged = true
+		cW(entry.buf, useColor, nYellow, "[%s] ", entry.requestID)
 	}
 	cW(entry.buf, useColor, nCyan, "\"")
 	cW(entry.buf, useColor, bMagenta, "%s ", r.Method)
@@ -160,9 +165,11 @@ func (l *DefaultLogFormatter) NewLogEntry(r *http.Request) LogEntry {
 
 type defaultLogEntry struct {
 	*DefaultLogFormatter
-	request  *http.Request
-	buf      *bytes.Buffer
-	useColor bool
+	request         *http.Request
+	buf             *bytes.Buffer
+	useColor        bool
+	requestID       string
+	requestIDLogged bool
 }
 
 func (l *defaultLogEntry) Write(status int, bytes int64, elapsed time.Duration) {
@@ -192,7 +199,18 @@ func (l *defaultLogEntry) Write(status int, bytes int64, elapsed time.Duration) 
 	}
 
 	if statusLevel(status) >= l.LogLevel {
+		if l.requestID != "" && !l.requestIDLogged {
+			l.buf.WriteString(" [")
+			l.buf.WriteString(l.requestID)
+			l.buf.WriteString("]")
+		}
 		l.Logger.Print(l.buf.String())
+	}
+}
+
+func (l *defaultLogEntry) SetRequestID(requestID string) {
+	if l.requestID == "" {
+		l.requestID = requestID
 	}
 }
 
