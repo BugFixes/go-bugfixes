@@ -69,6 +69,11 @@ func RequestID(next http.Handler) http.Handler {
 			myid := atomic.AddUint64(&reqid, 1)
 			requestID = fmt.Sprintf("%s-%06d", prefix, myid)
 		}
+		if logEntry := GetLogEntry(r); logEntry != nil {
+			if entryWithRequestID, ok := logEntry.(requestIDLogEntry); ok {
+				entryWithRequestID.SetRequestID(requestID)
+			}
+		}
 		ctx = context.WithValue(ctx, RequestIDKey, requestID)
 		next.ServeHTTP(w, r.WithContext(ctx))
 	}

@@ -3,6 +3,7 @@ package middleware_test
 import (
 	"net/http"
 	"net/http/httptest"
+	"regexp"
 	"strings"
 	"sync"
 	"testing"
@@ -183,6 +184,33 @@ func TestLogger_IncludesMethod(t *testing.T) {
 
 	assert.Equal(t, 1, logger.messageCount())
 	assert.Contains(t, logger.messages[0], "POST")
+}
+
+func TestLogger_IncludesRequestIDSetByMiddleware(t *testing.T) {
+	logger, logMiddleware := newTestLogger(middleware.Log)
+
+	handler := logMiddleware(middleware.RequestID(handlerWithStatus(http.StatusOK)))
+	req := httptest.NewRequest(http.MethodGet, "/test", nil)
+	rr := httptest.NewRecorder()
+
+	handler.ServeHTTP(rr, req)
+
+	assert.Equal(t, 1, logger.messageCount())
+	assert.Regexp(t, regexp.MustCompile(`\[[^\]]+-\d{6}\]`), logger.messages[0])
+}
+
+func TestLogger_IncludesProvidedRequestIDHeader(t *testing.T) {
+	logger, logMiddleware := newTestLogger(middleware.Log)
+
+	handler := logMiddleware(middleware.RequestID(handlerWithStatus(http.StatusOK)))
+	req := httptest.NewRequest(http.MethodGet, "/test", nil)
+	req.Header.Set(middleware.RequestIDHeader, "request-123")
+	rr := httptest.NewRecorder()
+
+	handler.ServeHTTP(rr, req)
+
+	assert.Equal(t, 1, logger.messageCount())
+	assert.Contains(t, logger.messages[0], "request-123")
 }
 
 func TestSetupLogger(t *testing.T) {
