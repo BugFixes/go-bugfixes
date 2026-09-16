@@ -94,10 +94,9 @@ func (s *System) sendToBugfixes(rvr interface{}, debugStack []byte) {
 		fmt.Fprintf(os.Stderr, "bugfixes: failed to send bug: %v\n", err)
 		return
 	}
-	if resp != nil && resp.Body != nil {
-		if err := resp.Body.Close(); err != nil {
-			fmt.Fprintf(os.Stderr, "bugfixes: failed to close body: %v\n", err)
-		}
+	defer resp.Body.Close()
+	if resp.StatusCode >= 300 {
+		fmt.Fprintf(os.Stderr, "bugfixes: server returned %s\n", resp.Status)
 	}
 }
 
