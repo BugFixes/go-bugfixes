@@ -32,13 +32,13 @@ type BugFixes struct {
 	FormattedError error `json:"-"`
 	LocalOnly      bool  `json:"-"`
 
-	Bug               string
-	Err               error
-	SkipDepthOverride int
+	Bug               string `json:"-"`
+	Err               error  `json:"-"`
+	SkipDepthOverride int    `json:"-"`
 
 	// Creds
-	AgentID string
-	Secret  string
+	AgentID string `json:"-"`
+	Secret  string `json:"-"`
 
 	Config *bugfixes.Config `json:"-"`
 }
@@ -235,11 +235,9 @@ func (b *BugFixes) sendLogBody(cfg bugfixes.Config, body []byte) {
 		_, _ = fmt.Fprintf(os.Stderr, "bugfixes sendLog do: %+v\n", err)
 		return
 	}
-	if resp != nil && resp.Body != nil {
-		if err := resp.Body.Close(); err != nil {
-			_, _ = fmt.Fprintf(os.Stderr, "bugfixes sendLog close: %+v\n", err)
-			return
-		}
+	defer resp.Body.Close()
+	if resp.StatusCode >= 300 {
+		_, _ = fmt.Fprintf(os.Stderr, "bugfixes sendLog: server returned %s\n", resp.Status)
 	}
 }
 
