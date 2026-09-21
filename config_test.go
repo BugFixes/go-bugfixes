@@ -69,4 +69,7 @@ func TestSetDefaultConfig(t *testing.T) {
 	if cfg.AgentSecret != "secret" {
 		t.Fatalf("expected configured secret, got %q", cfg.AgentSecret)
 	}
+	if cfg.LogLevel != "error" {
+		t.Fatalf("expected default error log level, got %q", cfg.LogLevel)
+	}
 }

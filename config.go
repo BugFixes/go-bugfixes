@@ -120,6 +120,9 @@ func (c Config) normalized() Config {
 	if c.Server == "" {
 		c.Server = DefaultServer
 	}
+	if strings.TrimSpace(c.LogLevel) == "" {
+		c.LogLevel = "error"
+	}
 
 	return c
 }
