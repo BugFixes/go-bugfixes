@@ -11,12 +11,18 @@ func TestConfigMerge(t *testing.T) {
 		Server:      "https://base.example",
 		AgentKey:    "base-key",
 		AgentSecret: "base-secret",
+		CommitSHA:   "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+		Release:     "api@1.0.0",
+		Environment: "production",
 		LogLevel:    "warn",
 	}
 
 	merged := base.Merge(bugfixes.Config{
-		AgentKey:  "override-key",
-		LocalOnly: true,
+		AgentKey:    "override-key",
+		LocalOnly:   true,
+		CommitSHA:   "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+		Release:     "api@1.1.0",
+		Environment: "staging",
 	})
 
 	if merged.Server != "https://base.example" {
@@ -33,6 +39,9 @@ func TestConfigMerge(t *testing.T) {
 	}
 	if !merged.LocalOnly {
 		t.Fatal("expected LocalOnly to be true")
+	}
+	if merged.CommitSHA != "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb" || merged.Release != "api@1.1.0" || merged.Environment != "staging" {
+		t.Fatalf("expected metadata overrides, got %#v", merged)
 	}
 }
 

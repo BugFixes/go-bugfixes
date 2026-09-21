@@ -20,6 +20,9 @@ type Config struct {
 	Server      string
 	AgentKey    string
 	AgentSecret string
+	CommitSHA   string
+	Release     string
+	Environment string
 	LogLevel    string
 	LocalOnly   bool
 	HTTPClient  *http.Client
@@ -42,6 +45,9 @@ func LoadConfigFromEnv() Config {
 		Server:      valueOrDefault(os.Getenv("BUGFIXES_SERVER"), DefaultServer),
 		AgentKey:    os.Getenv("BUGFIXES_AGENT_KEY"),
 		AgentSecret: os.Getenv("BUGFIXES_AGENT_SECRET"),
+		CommitSHA:   os.Getenv("BUGFIXES_COMMIT_SHA"),
+		Release:     os.Getenv("BUGFIXES_RELEASE"),
+		Environment: os.Getenv("BUGFIXES_ENVIRONMENT"),
 		LogLevel:    os.Getenv("BUGFIXES_LOG_LEVEL"),
 		LocalOnly:   localOnly,
 	}
@@ -85,6 +91,15 @@ func (c Config) Merge(override Config) Config {
 	}
 	if override.AgentSecret != "" {
 		merged.AgentSecret = override.AgentSecret
+	}
+	if override.CommitSHA != "" {
+		merged.CommitSHA = override.CommitSHA
+	}
+	if override.Release != "" {
+		merged.Release = override.Release
+	}
+	if override.Environment != "" {
+		merged.Environment = override.Environment
 	}
 	if override.LogLevel != "" {
 		merged.LogLevel = override.LogLevel

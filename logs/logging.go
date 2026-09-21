@@ -28,6 +28,9 @@ type BugFixes struct {
 	LineNumber   int    `json:"line_number"`
 	LogFmt       string `json:"log_fmt"`
 	Stack        []byte `json:"stack"`
+	CommitSHA    string `json:"commit_sha,omitempty"`
+	Release      string `json:"release,omitempty"`
+	Environment  string `json:"environment,omitempty"`
 
 	FormattedError error `json:"-"`
 	LocalOnly      bool  `json:"-"`
@@ -169,6 +172,9 @@ func (b *BugFixes) DoReporting() {
 	if reportLogLevel > logLevel {
 		return
 	}
+	b.CommitSHA = cfg.CommitSHA
+	b.Release = cfg.Release
+	b.Environment = cfg.Environment
 
 	body, err := json.Marshal(b)
 	if err != nil {

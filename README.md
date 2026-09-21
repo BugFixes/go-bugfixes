@@ -19,6 +19,12 @@ Optional environment variables:
 - `BUGFIXES_LOCAL_ONLY=true` keeps reporting local
 - `BUGFIXES_LOG_LEVEL` sets the minimum remote reporting level
 - `BUGFIXES_SERVER` overrides the default API endpoint
+- `BUGFIXES_COMMIT_SHA` records the deployed full Git object ID
+- `BUGFIXES_RELEASE` records the deployed release identifier
+- `BUGFIXES_ENVIRONMENT` records the deployment environment, such as `development`
+
+These metadata values are explicit: the library does not run Git or infer them from a
+CI provider or generic production flags. They may also be set directly on `Config`.
 
 ## Install
 
