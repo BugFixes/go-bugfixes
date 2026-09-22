@@ -15,13 +15,16 @@ import (
 )
 
 type BugFixesSend struct {
-	Bug        interface{} `json:"bug"`
-	Raw        interface{} `json:"raw"`
-	BugLine    string      `json:"bug_line"`
-	File       string      `json:"file"`
-	Line       string      `json:"line"`
-	LineNumber int         `json:"line_number"`
-	Level      string      `json:"level"`
+	Bug         interface{} `json:"bug"`
+	Raw         interface{} `json:"raw"`
+	BugLine     string      `json:"bug_line"`
+	File        string      `json:"file"`
+	Line        string      `json:"line"`
+	LineNumber  int         `json:"line_number"`
+	Level       string      `json:"level"`
+	CommitSHA   string      `json:"commit_sha,omitempty"`
+	Release     string      `json:"release,omitempty"`
+	Environment string      `json:"environment,omitempty"`
 }
 
 // BugFixes will create a new middleware handler from a http.Handler.
@@ -69,6 +72,9 @@ func (s *System) sendToBugfixes(rvr interface{}, debugStack []byte) {
 		fmt.Fprintf(os.Stderr, "bugfixes: failed to parse bug: %v\n", err)
 		return
 	}
+	bug.CommitSHA = cfg.CommitSHA
+	bug.Release = cfg.Release
+	bug.Environment = cfg.Environment
 
 	body, err := json.Marshal(bug)
 	if err != nil {
