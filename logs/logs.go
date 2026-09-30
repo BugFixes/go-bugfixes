@@ -23,7 +23,7 @@ func variadicFormat(inputs []interface{}) string {
 // levelCapturesStack returns true for levels that include a stack trace.
 func levelCapturesStack(level string) bool {
 	switch level {
-	case "error", "debug", "warn", "info", "log":
+	case "error":
 		return true
 	default:
 		return false
