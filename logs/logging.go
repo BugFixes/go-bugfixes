@@ -21,6 +21,7 @@ import (
 const logsPackagePrefix = "github.com/bugfixes/go-bugfixes/logs."
 
 type BugFixes struct {
+	Runtime      string `json:"runtime"`
 	FormattedLog string `json:"log"`
 	Level        string `json:"level"`
 	File         string `json:"file"`
@@ -175,6 +176,7 @@ func (b *BugFixes) DoReporting() {
 	b.CommitSHA = cfg.CommitSHA
 	b.Release = cfg.Release
 	b.Environment = cfg.Environment
+	b.Runtime = "go"
 
 	body, err := json.Marshal(b)
 	if err != nil {
