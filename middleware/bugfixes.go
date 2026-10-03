@@ -15,6 +15,7 @@ import (
 )
 
 type BugFixesSend struct {
+	Runtime     string      `json:"runtime"`
 	Bug         interface{} `json:"bug"`
 	Raw         interface{} `json:"raw"`
 	BugLine     string      `json:"bug_line"`
@@ -75,6 +76,7 @@ func (s *System) sendToBugfixes(rvr interface{}, debugStack []byte) {
 	bug.CommitSHA = cfg.CommitSHA
 	bug.Release = cfg.Release
 	bug.Environment = cfg.Environment
+	bug.Runtime = "go"
 
 	body, err := json.Marshal(bug)
 	if err != nil {

@@ -1,6 +1,7 @@
 package middleware_test
 
 import (
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"net/http/httptest"
@@ -80,6 +81,12 @@ func TestSendToBugfixes(t *testing.T) {
 			assert.Equal(t, "test_key", req.Header.Get("X-API-KEY"))
 			assert.Equal(t, "test_secret", req.Header.Get("X-API-SECRET"))
 			assert.Equal(t, "application/json", req.Header.Get("Content-Type"))
+			var payload map[string]any
+			if err := json.NewDecoder(req.Body).Decode(&payload); err != nil {
+				t.Errorf("decode report payload: %v", err)
+			} else {
+				assert.Equal(t, "go", payload["runtime"])
+			}
 			return httpmock.NewStringResponse(200, `{"status":"success"}`), nil
 		},
 	)

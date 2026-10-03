@@ -8,6 +8,7 @@ import (
 
 func TestWirePayloadHasNoCredentials(t *testing.T) {
 	b := &BugFixes{
+		Runtime:      "go",
 		FormattedLog: "x",
 		Level:        "error",
 		AgentID:      "the-key",
@@ -27,5 +28,8 @@ func TestWirePayloadHasNoCredentials(t *testing.T) {
 		if !strings.Contains(string(out), value) {
 			t.Fatalf("deployment metadata %q missing from payload: %s", value, out)
 		}
+	}
+	if !strings.Contains(string(out), `"runtime":"go"`) {
+		t.Fatalf("runtime tag missing from payload: %s", out)
 	}
 }
