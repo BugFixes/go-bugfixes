@@ -26,6 +26,7 @@ type BugFixesSend struct {
 	CommitSHA   string      `json:"commit_sha,omitempty"`
 	Release     string      `json:"release,omitempty"`
 	Environment string      `json:"environment,omitempty"`
+	Service     string      `json:"service,omitempty"`
 }
 
 // BugFixes will create a new middleware handler from a http.Handler.
@@ -76,6 +77,7 @@ func (s *System) sendToBugfixes(rvr interface{}, debugStack []byte) {
 	bug.CommitSHA = cfg.CommitSHA
 	bug.Release = cfg.Release
 	bug.Environment = cfg.Environment
+	bug.Service = cfg.Service
 	bug.Runtime = "go"
 
 	body, err := json.Marshal(bug)

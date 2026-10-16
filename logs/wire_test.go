@@ -16,6 +16,7 @@ func TestWirePayloadHasNoCredentials(t *testing.T) {
 		CommitSHA:    strings.Repeat("a", 40),
 		Release:      "api@2.4.0",
 		Environment:  "development",
+		Service:      "checkout",
 	}
 	out, err := json.Marshal(b)
 	if err != nil {
@@ -24,7 +25,7 @@ func TestWirePayloadHasNoCredentials(t *testing.T) {
 	if strings.Contains(string(out), "the-secret") || strings.Contains(string(out), "the-key") {
 		t.Fatalf("credentials leaked into payload: %s", out)
 	}
-	for _, value := range []string{strings.Repeat("a", 40), "api@2.4.0", "development"} {
+	for _, value := range []string{strings.Repeat("a", 40), "api@2.4.0", "development", `"service":"checkout"`} {
 		if !strings.Contains(string(out), value) {
 			t.Fatalf("deployment metadata %q missing from payload: %s", value, out)
 		}

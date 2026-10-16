@@ -23,6 +23,7 @@ func TestConfigMerge(t *testing.T) {
 		CommitSHA:   "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
 		Release:     "api@1.1.0",
 		Environment: "staging",
+		Service:     "checkout",
 	})
 
 	if merged.Server != "https://base.example" {
@@ -40,7 +41,7 @@ func TestConfigMerge(t *testing.T) {
 	if !merged.LocalOnly {
 		t.Fatal("expected LocalOnly to be true")
 	}
-	if merged.CommitSHA != "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb" || merged.Release != "api@1.1.0" || merged.Environment != "staging" {
+	if merged.CommitSHA != "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb" || merged.Release != "api@1.1.0" || merged.Environment != "staging" || merged.Service != "checkout" {
 		t.Fatalf("expected metadata overrides, got %#v", merged)
 	}
 }

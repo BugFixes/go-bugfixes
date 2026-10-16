@@ -22,6 +22,7 @@ Optional environment variables:
 - `BUGFIXES_COMMIT_SHA` records the deployed full Git object ID
 - `BUGFIXES_RELEASE` records the deployed release identifier
 - `BUGFIXES_ENVIRONMENT` records the deployment environment, such as `development`
+- `BUGFIXES_SERVICE` names the service sending the report, such as `checkout-api`
 
 These metadata values are explicit: the library does not run Git or infer them from a
 CI provider or generic production flags. They may also be set directly on `Config`.

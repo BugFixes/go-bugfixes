@@ -32,6 +32,7 @@ type BugFixes struct {
 	CommitSHA    string `json:"commit_sha,omitempty"`
 	Release      string `json:"release,omitempty"`
 	Environment  string `json:"environment,omitempty"`
+	Service      string `json:"service,omitempty"`
 
 	FormattedError error `json:"-"`
 	LocalOnly      bool  `json:"-"`
@@ -176,6 +177,7 @@ func (b *BugFixes) DoReporting() {
 	b.CommitSHA = cfg.CommitSHA
 	b.Release = cfg.Release
 	b.Environment = cfg.Environment
+	b.Service = cfg.Service
 	b.Runtime = "go"
 
 	body, err := json.Marshal(b)
