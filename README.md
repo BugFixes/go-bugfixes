@@ -2,6 +2,7 @@
 
 `go-bugfixes` is a small Go library that provides:
 
+- shared configuration in the root package (`github.com/bugfixes/go-bugfixes`)
 - application logging helpers in `logs`
 - HTTP middleware in `middleware`
 
@@ -17,8 +18,9 @@ To send logs or panic reports to Bugfixes, set:
 Optional environment variables:
 
 - `BUGFIXES_LOCAL_ONLY=true` keeps reporting local
-- `BUGFIXES_LOG_LEVEL` sets the minimum remote reporting level
-- `BUGFIXES_SERVER` overrides the default API endpoint
+- `BUGFIXES_LOG_LEVEL` sets the minimum remote reporting level (`debug`, `log`, `info`, `warn`,
+  `error`, `fatal`); defaults to `error`
+- `BUGFIXES_SERVER` overrides the default API endpoint (`https://api.bugfix.es/v1`)
 - `BUGFIXES_COMMIT_SHA` records the deployed full Git object ID
 - `BUGFIXES_RELEASE` records the deployed release identifier
 - `BUGFIXES_ENVIRONMENT` records the deployment environment, such as `development`
@@ -26,6 +28,22 @@ Optional environment variables:
 
 These metadata values are explicit: the library does not run Git or infer them from a
 CI provider or generic production flags. They may also be set directly on `Config`.
+
+Environment variables are read until a default config is set in code. `SetDefaultConfig`
+replaces the environment values rather than merging with them, so start from
+`LoadConfigFromEnv` to keep them:
+
+```go
+package main
+
+import bugfixes "github.com/bugfixes/go-bugfixes"
+
+func main() {
+	cfg := bugfixes.LoadConfigFromEnv()
+	cfg.Service = "checkout-api"
+	bugfixes.SetDefaultConfig(cfg)
+}
+```
 
 ## Install
 
@@ -112,7 +130,8 @@ system.AddMiddleware(system.CORS)
 handler := system.Handler(mux)
 ```
 
-Multiple domains are supported. Requests from unlisted origins return `403 Forbidden`.
+Multiple domains are supported, and `"*"` allows any origin. Requests with an `Origin` header
+from an unlisted origin return `403 Forbidden`; requests without an `Origin` header pass through.
 
 ### Security Headers
 
@@ -138,7 +157,8 @@ This sets the following headers by default:
 
 #### Domain-Specific Configuration
 
-Override defaults per-domain. Only set the fields you want to change; unset fields use defaults:
+Override defaults per-domain. The domain is matched exactly against the request's `Host`
+(including any port). Only set the fields you want to change; unset fields use defaults:
 
 ```go
 import "time"
