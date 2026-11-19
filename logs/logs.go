@@ -39,12 +39,11 @@ func (b *BugFixes) logAt(level, format string, inputs ...interface{}) string {
 	b.Level = level
 	b.FormattedLog = fmt.Sprintf(format, inputs...)
 
-	if !b.LocalOnly {
-		if levelCapturesStack(level) {
-			b.Stack = debug.Stack()
-		}
-		b.DoReporting()
+	// DoReporting prints locally and skips the send when LocalOnly.
+	if !b.LocalOnly && levelCapturesStack(level) {
+		b.Stack = debug.Stack()
 	}
+	b.DoReporting()
 
 	display := strings.ToUpper(level[:1]) + level[1:]
 	return fmt.Sprintf("%s: %s", display, b.FormattedLog)
@@ -78,8 +77,8 @@ func (b *BugFixes) Errorf(format string, inputs ...interface{}) error {
 
 	if !b.LocalOnly {
 		b.Stack = debug.Stack()
-		b.DoReporting()
 	}
+	b.DoReporting()
 
 	return b.FormattedError
 }
@@ -150,10 +149,7 @@ func (b *BugFixes) Fatalf(format string, inputs ...interface{}) {
 	b.Level = "fatal"
 	b.FormattedLog = fmt.Sprintf(format, inputs...)
 	b.Stack = debug.Stack()
-
-	if !b.LocalOnly {
-		b.DoReporting()
-	}
+	b.DoReporting()
 
 	panic(b)
 }

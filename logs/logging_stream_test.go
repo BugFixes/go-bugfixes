@@ -89,3 +89,16 @@ func TestDoReportingLocalStreamsByLevel(t *testing.T) {
 		})
 	}
 }
+
+func TestLocalPrintsLocally(t *testing.T) {
+	stdout, stderr := captureStandardStreams(t, func() {
+		Local().Infof("local info")
+		Local().Warnf("local warn")
+	})
+	if !strings.Contains(stdout, "local info") {
+		t.Fatalf("expected stdout to contain local info, got %q", stdout)
+	}
+	if !strings.Contains(stderr, "local warn") {
+		t.Fatalf("expected stderr to contain local warn, got %q", stderr)
+	}
+}
